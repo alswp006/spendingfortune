@@ -3,7 +3,7 @@ import { TYPE_MATRIX } from '@/lib/fortuneTable';
 
 // 운세 점수·유형 산출 순수 함수 — 저장소/React 의존 없음, 전부 결정론적
 
-type ScoreBand = 'high' | 'mid' | 'low';
+export type ScoreBand = 'high' | 'mid' | 'low';
 type DominantGroup = 'EAT' | 'SHOP' | 'LIFE' | 'MISC';
 
 const ALL_CATEGORIES: CategoryId[] = ['food', 'cafe', 'shopping', 'transport', 'culture', 'health', 'living', 'etc'];
@@ -47,7 +47,7 @@ function amountByCategory(dayLog: DayLog): Record<CategoryId, number> {
   return totals;
 }
 
-function scoreBandOf(score: number): ScoreBand {
+export function scoreBandOf(score: number): ScoreBand {
   if (score >= 70) return 'high';
   if (score >= 40) return 'mid';
   return 'low';
