@@ -238,7 +238,9 @@ export const RouteState = {} as const;
     TossRewardAd.tsx
   hooks/
   lib/
+    __tests__/
     contract.ts
+    date.ts
     storage.ts
     types.ts
     utils.ts
@@ -254,6 +256,7 @@ export const RouteState = {} as const;
 
 ### Exports (src/lib/)
 - contract.ts: export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings'; export type Fortune =; export type FortuneType = 'rich' | 'ruin' | 'neutral'; export type Category =; export type Alert =; export class ValidationError extends Error; export type todayKSTFn = () => string; export type addDaysFn = (dateStr: string, days: number) => string
+- date.ts: export function todayKST(now?: Date): string; export function addDays(date: string, delta: number): string; export function formatDate(date: string): string; export function isWithinDays(date: string, days: number): boolean; export function isValidDateKey(date: string): boolean
 - storage.ts: export function getItem<T>(key: string): T | null; export function setItem<T>(key: string, value: T): void; export function removeItem(key: string): void
 - types.ts: export type CategoryId = | 'food' | 'cafe' | 'shopping' | 'transport' | 'culture' | 'health' | 'living' | 'etc'; export const CATEGORY_LABEL: Record<CategoryId, string> =; export interface SpendingEntry; export interface DayLog; export type FortuneTypeId = | 'gourmet_saver' | 'cafe_addict' | 'delivery_lord' | 'smart_shopper' | 'wishlister' | 'impu; export interface FortuneType; export type AlertLevel = 'caution' | 'danger'; export type AlertRule = 'CATEGORY_CONCENTRATION' | 'SPIKE'
 - utils.ts: export function cn(...classes: (string | boolean | undefined | null)[]): string; export function formatNumber(n: number): string; export function formatCurrency(n: number, currency = 'KRW'): string
@@ -277,76 +280,4 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 
 ## Already Implemented (do NOT duplicate or overwrite)
 - 0001: 도메인 타입 + RouteState 정의 (files: src/lib/types.ts)
-
-## Available exports from existing files
-// src/App.tsx
-export default function App() {
-
-// src/components/AdSlot.tsx
-export function AdSlot({ adGroupId, className, variant, theme }: AdSlotProps) {
-
-// src/components/Amount.tsx
-export function Amount({
-
-// src/components/BottomCTA.tsx
-export function SubmitFooter({
-export function ButtonStack({
-
-// src/components/Card.tsx
-export function Card({
-
-// src/components/CountUp.tsx
-export function CountUp({
-
-// src/components/FloatingTabBar.tsx
-export type TabItem = {
-export function FloatingTabBar({ items }: { items: TabItem[] }) {
-
-// src/components/MiniBar.tsx
-export function MiniBar({
-
-// src/components/PageShell.tsx
-export function PageShell({ children, style }: { children: ReactNode; style?: CSSProperties }) {
-
-// src/components/ScreenScaffold.tsx
-export function ScreenScaffold({
-
-// src/components/Sparkline.tsx
-export function Sparkline({
-
-// src/components/StateView.tsx
-export function EmptyState({
-export function LoadingState({
-
-// src/components/SummaryHero.tsx
-export function SummaryHero({
-
-// src/components/TossPurchase.tsx
-export interface TossPurchaseResult {
-export function TossPurchase({
-
-// src/components/TossRewardAd.tsx
-export function TossRewardAd({
-
-// src/lib/contract.ts
-export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings';
-export type Fortune = { id: string; date: string; categoryId: string; amountKrw: number; score: number; fortuType: string; memo?: string; createdAt: string };
-export type FortuneType = 'rich' | 'ruin' | 'neutral';
-export type Category = { id: string; name: string; icon: string };
-export type Alert = { id: string; type: string; level: 'info' | 'warn' | 'error'; message: string; timestamp: string };
-export class ValidationError extends Error {
-export type todayKSTFn = () => string;
-export type addDaysFn = (dateStr: string, days: number) => string;
-export type isWithinDaysFn = (dateStr: string, days: number) => boolean;
-export type formatDateFn = (dateStr: string, format?: 'date' | 'datet
-
-## Memory Index (자동 학습 — 힌트로만 사용, 실제 코드 확인 필수)
-
-Available topics: deploy(2), general(11), testing(1), ui(1)
-
-Key lessons (verify against actual code before applying):
-- [general] 전역 라우팅·탭바·Provider 배선은 개별 화면보다 먼저(초반 20% 안에) 완료하고 미구현 화면은 스텁 라우트로 연결해, 시간 예산이 소진돼도 앱이 항상 실행 가능한 상태를 유지하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 저장·데이터 접근 등 기반 계층 패킷은 이를 import 하는 화면 패킷보다 반드시 먼저 완료·병합하고, 미완료면 상위 화면 패킷 병합을 차단하라 — 빈 기반 모듈 하나가 전 라우트 스모크를 무너뜨린다. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 외부에서 들어온 모든 값(라우터 state, 로컬 저장소, 부분 입력 폼)은 사용 직전에 배열·객체 기본값으로 정규화하고, 테이블/맵 조회 결과는 존재 확인 후에만 하위 속성이나 length에 접근하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 의존 그래프 최하층의 타입·계약 파일은 런타임 코드 0줄의 순수 선언으로 가장 먼저 단독 타입체크를 통과시키고, 파일 생성은 셸 명령이 아닌 허용된 편집 도구로만 하게 강제하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 영속 저장소에서 읽은 값은 항상 스키마 기본값으로 정규화해 배열·객체 타입을 보장한 뒤 반환하고, 화면은 빈/손상/부분 데이터에서도 렌더되도록 방어하라. (60% · 타 앱 1회 — 맹신 금지)
+- 0002: 날짜 유틸(KST) todayKST/addDays/formatDate (files: src/lib/date.ts, src/lib/__tests__/date.test.ts)
