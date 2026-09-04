@@ -124,7 +124,9 @@ describe("저장소 CRUD + 입력 검증 + 손상 복구", () => {
       });
 
       expect(result.ok).toBe(false);
-      expect(result.reason).toBe("INVALID_AMOUNT");
+      if (!result.ok) {
+        expect(result.reason).toBe("INVALID_AMOUNT");
+      }
       expect(localStorage.getItem("sf.daylogs.v1")).toBe(initialState);
     }
   });
