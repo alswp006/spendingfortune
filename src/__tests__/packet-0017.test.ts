@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import fs from "node:fs";
 import path from "node:path";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import { mockAll, mockNavigate } from "@/__tests__/__helpers__/mocks";
 import { renderWithRouter } from "@/__tests__/__helpers__/test-utils";
 
@@ -64,13 +64,13 @@ describe("[부가] /settings 설정 · 데이터 초기화 · 고지", () => {
   it("AC-2[P0]: '데이터 전체 삭제' 탭 → 다이얼로그의 '삭제하기' 탭 시 resetAll이 1회 호출되고 Toast '기록을 모두 지웠어요'가 표시된다", async () => {
     renderWithRouter(React.createElement(Settings));
 
-    findRowByLabel("데이터 전체 삭제").click();
+    fireEvent.click(findRowByLabel("데이터 전체 삭제"));
 
     const dialog = await screen.findByRole("alertdialog");
     expect(dialog).toBeInTheDocument();
 
     const confirmButton = screen.getByRole("button", { name: "삭제하기" });
-    confirmButton.click();
+    fireEvent.click(confirmButton);
 
     await waitFor(() => expect(mockResetAll).toHaveBeenCalledTimes(1));
 
@@ -82,12 +82,12 @@ describe("[부가] /settings 설정 · 데이터 초기화 · 고지", () => {
   it("AC-3[P0]: 다이얼로그에서 '닫기' 탭 시 resetAll이 호출되지 않고 다이얼로그가 닫힌다", async () => {
     renderWithRouter(React.createElement(Settings));
 
-    findRowByLabel("데이터 전체 삭제").click();
+    fireEvent.click(findRowByLabel("데이터 전체 삭제"));
     await screen.findByRole("alertdialog");
 
     const closeButton = screen.getByRole("button", { name: "닫기" });
     expect(closeButton).toHaveTextContent("닫기");
-    closeButton.click();
+    fireEvent.click(closeButton);
 
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(mockResetAll).not.toHaveBeenCalled();
