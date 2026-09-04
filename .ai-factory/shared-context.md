@@ -315,22 +315,26 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - 0003: 12유형 캐릭터 테이블 + 고정 문구 테이블 (files: src/lib/fortuneTable.ts, src/lib/__tests__/fortuneTable.test.ts, public/characters/)
 - 0004: 저장소 CRUD + 입력 검증 + 손상 복구 (files: src/lib/storage.ts, src/lib/__tests__/storage.test.ts)
 - 0005: 보존 정책(90일/30일) + Quota 대응 + Fortune 저장소 (files: src/lib/storage.ts, src/lib/__tests__/storage.prune.test.ts)
+- 0006: 통계 집계 getStats (files: src/lib/stats.ts, src/lib/__tests__/stats.test.ts)
 - 0007: 운세 점수·유형 산출 순수 함수 (files: src/lib/fortuneEngine.ts, src/lib/__tests__/fortuneEngine.test.ts)
 - 0008: 지름신 주의보 규칙 엔진 detectAlerts (files: src/lib/alerts.ts, src/lib/__tests__/alerts.test.ts)
 - 0009: computeFortune 오케스트레이션(캐시·근거 가드·저장) (files: src/lib/computeFortune.ts, src/lib/__tests__/computeFortune.test.ts)
 - 0010: 앱 상태 훅 useAppData + 스트릭 계산 (files: src/hooks/useAppData.ts, src/hooks/__tests__/useAppData.test.tsx)
 - 0011: / 홈(오늘) 화면 — 스트릭·요약·상태 카드 (files: src/pages/Home.tsx, src/pages/__tests__/Home.test.tsx)
 - 0012: /input 폼 — 카테고리 칩 + 금액/메모 입력 (files: src/pages/Result.tsx, src/components/PersonaHeroCard.tsx, src/components/AxisMiniBars.tsx, src/components/TipsCard.tsx)
+- 0013: /input 목록·무지출·저장 후 /result 이동 (files: src/pages/Input.tsx, src/pages/__tests__/Input.save.test.tsx)
 - 0014: /result 운세 결과 — 리워드 광고 게이트 (files: src/pages/Result.tsx, src/pages/__tests__/Result.test.tsx)
 - 0015: [부가] /history 7일 소비운세 히스토리 (files: src/pages/History.tsx, src/pages/__tests__/History.test.tsx)
 - 0016: [부가] /share 결과 공유 카드 (files: src/pages/Share.tsx, src/pages/__tests__/Share.test.tsx)
 - 0017: [부가] /settings 설정 · 데이터 초기화 · 고지 (files: src/pages/Settings.tsx, src/pages/__tests__/Settings.test.tsx)
 - 0018: App 라우팅 배선 + FloatingTabBar 전역 배치 (files: src/App.tsx)
 - 0019: 배너 광고 배치 + 콘텐츠 고지 다이얼로그 + 검수 폴리시 (files: src/components/AdSection.tsx, src/hooks/useContentNotice.ts, src/pages/Home.tsx)
-- 0006: 통계 집계 getStats (files: src/lib/stats.ts, src/lib/__tests__/stats.test.ts)
-- 0013: /input 목록·무지출·저장 후 /result 이동 (files: src/pages/Input.tsx, src/pages/__tests__/Input.save.test.tsx)
-- heal-1-02: /input 항목 목록·무지출·저장 후 /result 이동 완성 (files: src/pages/Input.tsx, src/pages/__tests__/Input.save.test.tsx)
 - heal-1-01: getStats 통계 모듈 신설 — 미해결 import 제거로 tsc·빌드 복구 (files: src/lib/stats.ts, src/lib/__tests__/stats.test.ts)
+- heal-1-02: /input 항목 목록·무지출·저장 후 /result 이동 완성 (files: src/pages/Input.tsx, src/pages/__tests__/Input.save.test.tsx)
+- heal-1-03: 전체 라우트 스모크 — 배선 무결성 최종 검증 (files: src/App.tsx, src/__tests__/routes.smoke.test.tsx)
+
+## TDD 상태
+⚠️ TDD 테스트 파일 자동 작성에 실패했습니다. 소스 코드를 작성하기 전에 `src/__tests__/packet-XXXX.test.ts` 파일에 AC 기반 테스트를 먼저 작성하세요 (TDD red phase). 테스트 작성 후 구현하세요.
 
 ## Available exports from existing files
 // src/__scratch__/ScratchApp.tsx
