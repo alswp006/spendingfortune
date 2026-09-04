@@ -28,7 +28,8 @@ export function useContentNotice(): ContentNotice {
 
   return {
     open,
-    description: '이 서비스는 재미용 콘텐츠이며, 투자·금융 자문이 아니에요. 의사결정은 신중하게 하세요.',
+    description:
+      '이 서비스의 소비운세는 입력하신 지출 데이터를 바탕으로 생성된 재미용 콘텐츠이며, 투자·금융 자문이 아니에요.',
     acknowledge,
   };
 }

@@ -321,6 +321,7 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - 0012: /input 폼 — 카테고리 칩 + 금액/메모 입력 (files: src/pages/Result.tsx, src/components/PersonaHeroCard.tsx, src/components/AxisMiniBars.tsx, src/components/TipsCard.tsx)
 - 0014: /result 운세 결과 — 리워드 광고 게이트 (files: src/pages/Result.tsx, src/pages/__tests__/Result.test.tsx)
 - 0015: [부가] /history 7일 소비운세 히스토리 (files: src/pages/History.tsx, src/pages/__tests__/History.test.tsx)
+- 0016: [부가] /share 결과 공유 카드 (files: src/pages/Share.tsx, src/pages/__tests__/Share.test.tsx)
 
 ## Available exports from existing files
 // src/App.tsx
@@ -328,9 +329,6 @@ export default function App() {
 
 // src/__scratch__/ScratchApp.tsx
 export {};
-
-// src/components/AdSection.tsx
-export function AdSection() {
 
 // src/components/AdSlot.tsx
 export function AdSlot({ adGroupId, className, variant, theme }: AdSlotProps) {
@@ -383,9 +381,6 @@ export function computeStreak(logs: DayLog[], endDate: string): number {
 export interface UseAppDataResult {
 export function useAppData(): UseAppDataResult {
 
-// src/hooks/useContentNotice.ts
-export function useContentNotice(): ContentNotice {
-
 // src/hooks/useTypedNavigate.ts
 export type AppPath = keyof RouteState;
 export function useTypedNavigate() {
@@ -398,7 +393,9 @@ export function detectAlerts(input: DetectAlertsInput): AlertItem[] {
 export function computeFortune(date: string): Result<FortuneRecord> {
 export function unlockFortune(date: string): Result<FortuneRecord> {
 
-// src/lib/contrac
+// src/lib/contract.ts
+export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings';
+export type Fortune = { id: string; date: string; cat
 
 ## Memory Index (자동 학습 — 힌트로만 사용, 실제 코드 확인 필수)
 

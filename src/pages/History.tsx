@@ -51,7 +51,13 @@ export default function History() {
     return (
       <ScreenScaffold top={<Top title={<Top.TitleParagraph>소비운세 히스토리</Top.TitleParagraph>} />}>
         <EmptyState
-          icon={<Asset.ContentIcon name="iconStarRegular" alt="" />}
+          icon={
+            <Asset.Image
+              frameShape={{ width: 72, height: 72, radius: 20 }}
+              src="/characters/zero_spender.png"
+              alt="아직 기록이 없어요"
+            />
+          }
           title="아직 기록이 없어요"
           action={
             <Button variant="weak" display="block" onClick={() => nav('/input')}>

@@ -87,7 +87,7 @@ export default function Home() {
 
       <AlertDialog
         open={noticeOpen}
-        title="시작 전 안내"
+        title="안내"
         description={noticeDescription}
         onClose={acknowledgeNotice}
         alertButton={

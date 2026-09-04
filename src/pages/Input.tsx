@@ -182,7 +182,13 @@ export default function Input() {
         </Card>
       ) : (
         <EmptyState
-          icon={<Asset.ContentIcon name="iconStarRegular" alt="빈 지출 목록" />}
+          icon={
+            <Asset.Image
+              frameShape={{ width: 72, height: 72, radius: 20 }}
+              src="/characters/zero_spender.png"
+              alt="아직 담은 지출이 없어요"
+            />
+          }
           title="어제 쓴 돈을 하나씩 담아주세요"
           testId="entries-empty"
         />

@@ -15,7 +15,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent, within } from "@testing-library/react";
 import { renderWithRouter } from "@/__tests__/__helpers__/test-utils";
 import { mockNavigate } from "@/__tests__/__helpers__/mocks";
 import * as storage from "@/lib/storage";
@@ -138,7 +138,9 @@ describe("/input 목록·무지출·저장 후 /result 이동 (Task 3.2)", () =>
     const empty = screen.getByTestId("entries-empty");
     expect(empty).toBeInTheDocument();
     expect(screen.getByText("어제 쓴 돈을 하나씩 담아주세요")).toBeInTheDocument();
-    expect(empty.querySelector("[data-content-icon]")).not.toBeNull();
+    // 빈 상태 아이콘은 로컬 일러스트(Asset.Image)다 — Asset.ContentIcon은 static.toss.im을
+    // fetch하다 실패하면 throw해 트리를 언마운트시켜(흰 화면 + console.error) 쓰지 않는다.
+    expect(within(empty).getByRole("img")).toBeInTheDocument();
     expect(submitButton()).toBeDisabled();
   });
 
