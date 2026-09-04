@@ -1,72 +1,84 @@
-import { Top, Paragraph, Spacing, ListRow, Button } from '@toss/tds-mobile';
+import { useEffect, useState } from 'react';
+import { Top, Paragraph, Spacing, Button, Toast } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
-import { ScreenScaffold } from '../components/ScreenScaffold';
-import { SummaryHero } from '../components/SummaryHero';
-import { Card } from '../components/Card';
+import { ScreenScaffold } from '@/components/ScreenScaffold';
+import { SummaryHero } from '@/components/SummaryHero';
+import { Amount } from '@/components/Amount';
+import { EmptyState, LoadingState } from '@/components/StateView';
+import { useAppData } from '@/hooks/useAppData';
+import { STORAGE_KEYS } from '@/lib/types';
 
 /**
- * Golden Home page — 대시보드/탭-루트 골든 레퍼런스.
- *
- * 다른 페이지를 쓸 때 이 패턴을 모방하라:
- * - ScreenScaffold로 감싼다(raw fragment 골격 금지) — safe-area + 100dvh 자동 처리.
- * - 화면 최상단에 SummaryHero로 시각 앵커를 만든다('휑함'의 가장 큰 원인은 앵커 부재).
- *   데이터가 있으면 value에 <Amount value={n} unit="원" typography="t1" />로 핵심 숫자를 크게 박아라.
- * - 1차 진입 액션은 SummaryHero 카드 내부 버튼(display="block", 전체폭)에 둔다.
- *   → 화면 중앙 부유/좌측 글자폭 버튼 금지. 하단 TabBar가 있으면 SubmitFooter와 겹치므로 카드 안에.
- * - 핵심 정보는 raw <div>가 아니라 Card로 묶어 위계를 만든다.
- * - 하단 탭이 필요하면(2~5탭): bottom={<FloatingTabBar items={[{label,path}...]} />}.
- *   ('TDS TabBar'는 존재하지 않는다 — 직접 만들지 말고 FloatingTabBar를 써라.)
- * - 카피는 CLAUDE.md "카피 규칙 — AI 냄새 금지"를 따른다: 기능 나열식 홍보 문구·상투구·
- *   generic 버튼("시작하기") 금지. 이 파일의 예시 문구도 앱 맥락에 맞게 교체 대상이다.
- *
- * Scaffold tokens (replaced by scaffold-toss.ts at project creation):
- *   SpendingFortune -> the app's display name
- *   어제 지출을 입력하면 오늘의 소비운세와 절약 조언을 리워드 광고 시청 후 알려주는 매일 콘텐츠    -> the one-line description
+ * sf.daylogs.v1이 파싱 불가능한 JSON이면 true를 반환한다. storage.ts의 자가 치유는
+ * useAppData 내부에서 일어나 화면에 신호를 주지 않으므로, 손상 안내 토스트를 띄우기
+ * 위해 Home이 직접 원본 문자열을 한 번 더 확인한다.
  */
-
-// ⚠ 이 목록은 골격 예시다 — 앱의 실제 콘텐츠(핵심 지표·최근 기록·바로가기)로 반드시 교체하라.
-// '간편한 사용/빠른 처리' 같은 기능 나열식 홍보 문구는 카피 규칙(CLAUDE.md "AI 냄새 금지") 위반이다.
-// 사용자가 이 화면에서 실제로 확인할 정보를 넣어라 — 아래처럼 데이터가 사는 행으로.
-const HIGHLIGHTS = [
-  { title: '오늘', description: '아직 기록이 없어요' },
-  { title: '이번 주', description: '기록 3건 · 평균 12분' },
-];
+function isDayLogsCorrupted(): boolean {
+  const raw = localStorage.getItem(STORAGE_KEYS.dayLogs);
+  if (!raw) return false;
+  try {
+    JSON.parse(raw);
+    return false;
+  } catch {
+    return true;
+  }
+}
 
 export default function Home() {
   const navigate = useNavigate();
+  const { loading, streak, yesterdayLog } = useAppData();
+  const [showCorruptToast, setShowCorruptToast] = useState(false);
+
+  useEffect(() => {
+    if (isDayLogsCorrupted()) {
+      localStorage.setItem(STORAGE_KEYS.dayLogs, '{}');
+      setShowCorruptToast(true);
+    }
+  }, []);
+
+  const isEmptyYesterday = !yesterdayLog.noSpend && yesterdayLog.entries.length === 0;
 
   return (
-    <ScreenScaffold
-      top={<Top title={<Top.TitleParagraph>SpendingFortune</Top.TitleParagraph>} />}
-    >
-      {/* 시각 앵커: 헤드라인 + 카드 내 진입 버튼(부유 금지, display="block" 전체폭).
-          데이터 앱이면 value를 <Amount typography="t1" />(핵심 숫자)로 교체하라. */}
-      <SummaryHero
-        label="SpendingFortune"
-        value={<Paragraph.Text typography="t2">어제 지출을 입력하면 오늘의 소비운세와 절약 조언을 리워드 광고 시청 후 알려주는 매일 콘텐츠</Paragraph.Text>}
-        caption="로그인 없이 바로 쓸 수 있어요"
-        action={
-          // 라우팅 배선(Task 4.1)에서 실제 진입 경로로 연결. 스트릭·CTA 분기는 Task 3.10이 붙인다.
-          <Button variant="fill" display="block" onClick={() => navigate('/input')}>
-            어제 지출 기록하기
-          </Button>
-        }
-        testId="home-hero"
-      />
+    <ScreenScaffold top={<Top title={<Top.TitleParagraph>오늘의 소비운세</Top.TitleParagraph>} />}>
+      {loading ? (
+        <LoadingState rows={3} testId="home-skeleton" />
+      ) : (
+        <>
+          <div data-testid="streak-badge">
+            <Paragraph.Text typography="st11">연속 {streak}일째 기록 중</Paragraph.Text>
+          </div>
 
-      <Spacing size={24} />
+          <Spacing size={12} />
 
-      {/* 핵심 정보는 Card로 묶기(raw div 금지) — 위계 생성 */}
-      <Card testId="home-highlights">
-        {HIGHLIGHTS.map((h, idx) => (
-          <ListRow
-            key={idx}
-            contents={<ListRow.Texts type="2RowTypeA" top={h.title} bottom={h.description} />}
+          <SummaryHero
+            testId="home-hero"
+            label="어제 총 지출"
+            value={
+              <div data-testid="home-summary-hero">
+                <Amount value={yesterdayLog.total} unit="원" typography="t1" />
+              </div>
+            }
+            caption={yesterdayLog.noSpend ? '어제는 무지출이었어요' : `${yesterdayLog.entries.length}건 기록`}
+            action={
+              <Button variant="fill" display="block" data-testid="home-cta" onClick={() => navigate('/input')}>
+                어제 지출 기록하기
+              </Button>
+            }
           />
-        ))}
-      </Card>
 
-      <Spacing size={24} />
+          {isEmptyYesterday ? (
+            <>
+              <Spacing size={16} />
+              <EmptyState
+                title="첫 기록을 남기면 내일부터 소비운세가 열려요"
+                testId="home-empty-state"
+              />
+            </>
+          ) : null}
+        </>
+      )}
+
+      <Toast open={showCorruptToast} text="기록을 불러오지 못해 초기화했어요" position="bottom" />
     </ScreenScaffold>
   );
 }
