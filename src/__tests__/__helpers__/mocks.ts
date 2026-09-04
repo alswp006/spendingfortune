@@ -26,7 +26,12 @@ import { vi } from "vitest";
  * 아래 `mockXxx()`들은 기존 호출부 호환을 위해 남기되 이미 전역 등록됐으면 no-op이다.
  */
 export const mockNavigate = vi.fn();
-export const mockLocation = { pathname: "/", search: "", state: null, key: "default" };
+export const mockLocation: { pathname: string; search: string; state: unknown; key: string } = {
+  pathname: "/",
+  search: "",
+  state: null,
+  key: "default",
+};
 
 // ── TDS (@toss/tds-mobile) ──
 // TDS components use CSS-in-JS + layout hooks that crash in jsdom.
