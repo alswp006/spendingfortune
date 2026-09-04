@@ -8,7 +8,10 @@ import {
   resolveLuckyCategory,
   resolveCautionCategory,
 } from '@/lib/fortuneEngine';
-import type { DayLog } from '@/lib/types';
+import type { DayLog, FortuneTypeId } from '@/lib/types';
+import { TYPE_MATRIX } from '@/lib/fortuneTable';
+
+const VALID_TYPE_IDS: FortuneTypeId[] = Object.values(TYPE_MATRIX).flatMap((bandMap) => Object.values(bandMap));
 
 // ---- Helpers ----
 
@@ -300,16 +303,7 @@ describe('Packet 0007: 운세 점수·유형 산출 순수 함수', () => {
       const score = computeScore(input).score;
       const typeId = resolveTypeId(group, score);
 
-      const validTypeIds = [
-        'zero_spender',
-        'wise_saver',
-        'balanced_spender',
-        'prudent_spender',
-        'risk_taker',
-        'impulse_god',
-      ];
-
-      if (!validTypeIds.includes(typeId)) {
+      if (!VALID_TYPE_IDS.includes(typeId)) {
         violations.push({
           input,
           group,
@@ -358,18 +352,20 @@ describe('Packet 0007: 운세 점수·유형 산출 순수 함수', () => {
     const dayLog = createTestDayLog('2026-09-05', [{ category: 'food', amount: 50000 }]);
     const group = resolveDominantGroup(dayLog);
 
-    // If score === 70, which typeId?
+    // If score === 70, which typeId? (경계값은 high band에 속한다)
     const typeId = resolveTypeId(group, 70);
-    expect(['wise_saver', 'balanced_spender', 'prudent_spender']).toContain(typeId);
+    expect(VALID_TYPE_IDS).toContain(typeId);
+    expect(typeId).toBe(TYPE_MATRIX[group].high);
   });
 
   it('should handle edge case: score exactly at band boundary 40', () => {
     const dayLog = createTestDayLog('2026-09-05', [{ category: 'shopping', amount: 40000 }]);
     const group = resolveDominantGroup(dayLog);
 
-    // If score === 40, which typeId?
+    // If score === 40, which typeId? (경계값은 mid band에 속한다)
     const typeId = resolveTypeId(group, 40);
-    expect(['balanced_spender', 'prudent_spender', 'risk_taker']).toContain(typeId);
+    expect(VALID_TYPE_IDS).toContain(typeId);
+    expect(typeId).toBe(TYPE_MATRIX[group].mid);
   });
 
   it('should handle edge case: very large yesterdayTotal', () => {
