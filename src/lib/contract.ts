@@ -21,7 +21,12 @@ export type Category = { id: string; name: string; icon: string };
 export type Alert = { id: string; type: string; level: 'info' | 'warn' | 'error'; message: string; timestamp: string };
 
 /** 입력 검증 오류 클래스 (구현: 패킷 0001) */
-export type ValidationError = class ValidationError extends Error { constructor(field: string, reason: string) };
+export class ValidationError extends Error {
+  constructor(field: string, reason: string) {
+    super(`${field}: ${reason}`);
+    this.name = 'ValidationError';
+  }
+}
 
 /** 오늘 날짜 ISO string (KST) (구현: 패킷 0002) */
 export type todayKSTFn = () => string;
