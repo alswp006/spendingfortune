@@ -12,6 +12,7 @@ import {
   Asset,
   Toast,
 } from '@toss/tds-mobile';
+import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 import { ScreenScaffold } from '@/components/ScreenScaffold';
 import { Card } from '@/components/Card';
 import { Amount } from '@/components/Amount';
@@ -25,6 +26,14 @@ import { CATEGORY_LABEL, type CategoryId, type SpendingEntry } from '@/lib/types
 const CATEGORY_IDS = Object.keys(CATEGORY_LABEL) as CategoryId[];
 const MAX_AMOUNT = 10_000_000;
 const MAX_ENTRIES = 10;
+
+function fireHaptic(type: 'success' | 'tickMedium') {
+  try {
+    Promise.resolve(generateHapticFeedback({ type })).catch(() => {});
+  } catch {
+    /* WebView 밖(브라우저/검수자 PC/jsdom)에서는 throw — 무시 */
+  }
+}
 
 function makeEntryId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -96,6 +105,7 @@ export default function Input() {
   }
 
   function handleDelete(id: string) {
+    fireHaptic('tickMedium');
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
@@ -123,6 +133,7 @@ export default function Input() {
   }
 
   function handleNoSpend() {
+    fireHaptic('success');
     submitLog({ entries: [], noSpend: true, total: 0 });
   }
 

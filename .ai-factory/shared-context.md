@@ -327,6 +327,7 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - 0017: [부가] /settings 설정 · 데이터 초기화 · 고지 (files: src/pages/Settings.tsx, src/pages/__tests__/Settings.test.tsx)
 - 0018: App 라우팅 배선 + FloatingTabBar 전역 배치 (files: src/App.tsx)
 - 0019: 배너 광고 배치 + 콘텐츠 고지 다이얼로그 + 검수 폴리시 (files: src/components/AdSection.tsx, src/hooks/useContentNotice.ts, src/pages/Home.tsx)
+- 0006: 통계 집계 getStats (files: src/lib/stats.ts, src/lib/__tests__/stats.test.ts)
 
 ## Available exports from existing files
 // src/App.tsx
