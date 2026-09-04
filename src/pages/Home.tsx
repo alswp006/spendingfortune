@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Top, Paragraph, Spacing, Button, Toast } from '@toss/tds-mobile';
+import { Top, Paragraph, Spacing, Button, Toast, AlertDialog } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import { ScreenScaffold } from '@/components/ScreenScaffold';
 import { SummaryHero } from '@/components/SummaryHero';
 import { Amount } from '@/components/Amount';
 import { EmptyState, LoadingState } from '@/components/StateView';
+import { AdSection } from '@/components/AdSection';
 import { useAppData } from '@/hooks/useAppData';
+import { useContentNotice } from '@/hooks/useContentNotice';
 import { STORAGE_KEYS } from '@/lib/types';
 
 /**
@@ -28,6 +30,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { loading, streak, yesterdayLog } = useAppData();
   const [showCorruptToast, setShowCorruptToast] = useState(false);
+  const { open: noticeOpen, description: noticeDescription, acknowledge: acknowledgeNotice } = useContentNotice();
 
   useEffect(() => {
     if (isDayLogsCorrupted()) {
@@ -75,10 +78,22 @@ export default function Home() {
               />
             </>
           ) : null}
+
+          <AdSection />
         </>
       )}
 
       <Toast open={showCorruptToast} text="기록을 불러오지 못해 초기화했어요" position="bottom" />
+
+      <AlertDialog
+        open={noticeOpen}
+        title="시작 전 안내"
+        description={noticeDescription}
+        onClose={acknowledgeNotice}
+        alertButton={
+          <AlertDialog.AlertButton onClick={acknowledgeNotice}>확인</AlertDialog.AlertButton>
+        }
+      />
     </ScreenScaffold>
   );
 }
