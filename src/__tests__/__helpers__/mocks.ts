@@ -33,16 +33,26 @@ export function mockTds() {
       React.createElement("button", { onClick, disabled: disabled || loading || undefined, "data-loading": loading ? "true" : undefined, ...props }, children),
 
     ListRow: Object.assign(
-      ({ children, onClick, ...props }: any) =>
-        React.createElement("div", { onClick, role: "listitem", ...props }, children),
+      ({ children, onClick, left, contents, right, ...props }: any) =>
+        React.createElement(
+          "div",
+          { onClick, role: "listitem", ...props },
+          left,
+          contents,
+          right,
+          children,
+        ),
       {
         Text: ({ children }: any) => React.createElement("span", null, children),
-        Texts: ({ top, bottom, type }: any) =>
+        Texts: ({ top, bottom, middle, type }: any) =>
           React.createElement(
             React.Fragment,
             null,
             React.createElement("span", { "data-type": type, "data-slot": "top" }, top),
-            React.createElement("span", { "data-slot": "bottom" }, bottom),
+            middle !== undefined &&
+              React.createElement("span", { "data-slot": "middle" }, middle),
+            bottom !== undefined &&
+              React.createElement("span", { "data-slot": "bottom" }, bottom),
           ),
       },
     ),
@@ -78,6 +88,26 @@ export function mockTds() {
       open
         ? React.createElement("div", { role: "status", "data-position": position }, text)
         : null,
+
+    ConfirmDialog: Object.assign(
+      ({ open, title, description, cancelButton, confirmButton }: any) =>
+        open
+          ? React.createElement(
+              "div",
+              { role: "alertdialog", "aria-label": title },
+              React.createElement("h2", null, title),
+              React.createElement("p", null, description),
+              cancelButton,
+              confirmButton,
+            )
+          : null,
+      {
+        CancelButton: ({ children, onClick }: any) =>
+          React.createElement("button", { onClick }, children),
+        ConfirmButton: ({ children, onClick }: any) =>
+          React.createElement("button", { onClick }, children),
+      },
+    ),
 
     Tab: Object.assign(
       ({ children }: any) => React.createElement("div", { role: "tablist" }, children),
