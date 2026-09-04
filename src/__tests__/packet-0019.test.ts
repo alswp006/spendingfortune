@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 import fs from "node:fs";
 import path from "node:path";
-import { render, screen, renderHook, act } from "@testing-library/react";
+import { render, screen, renderHook, act, fireEvent } from "@testing-library/react";
 import { generateHapticFeedback } from "@apps-in-toss/web-framework";
 import { getMeta, patchMeta } from "@/lib/storage";
 import { renderWithRouter } from "@/__tests__/__helpers__/test-utils";
@@ -68,7 +68,7 @@ describe("배너 광고 배치 + 콘텐츠 고지 다이얼로그 + 검수 폴�
     expect(dialog.textContent).toContain("재미용 콘텐츠이며, 투자·금융 자문이 아니에요");
 
     const confirmButton = screen.getByRole("button", { name: "확인" });
-    confirmButton.click();
+    fireEvent.click(confirmButton);
 
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(typeof getMeta().noticeAckedAt).toBe("number");
