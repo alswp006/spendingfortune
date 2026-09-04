@@ -224,6 +224,7 @@ export const RouteState = {} as const;
   __scratch__/
     ScratchApp.tsx
   components/
+    AdSection.tsx
     AdSlot.tsx
     Amount.tsx
     BottomCTA.tsx
@@ -240,10 +241,12 @@ export const RouteState = {} as const;
     TossRewardAd.tsx
   hooks/
     useAppData.ts
+    useContentNotice.ts
     useTypedNavigate.ts
   lib/
     __tests__/
     alerts.ts
+    computeFortune.ts
     contract.ts
     date.ts
     fortuneEngine.ts
@@ -270,9 +273,10 @@ export const RouteState = {} as const;
 
 ### Exports (src/lib/)
 - alerts.ts: export interface DetectAlertsInput; export function detectAlerts(input: DetectAlertsInput): AlertItem[]
+- computeFortune.ts: export function computeFortune(date: string): Result<FortuneRecord>; export function unlockFortune(date: string): Result<FortuneRecord>
 - contract.ts: export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings'; export type Fortune =; export type FortuneType = 'rich' | 'ruin' | 'neutral'; export type Category =; export type Alert =; export class ValidationError extends Error; export type todayKSTFn = () => string; export type addDaysFn = (dateStr: string, days: number) => string
 - date.ts: export function todayKST(now?: Date): string; export function addDays(date: string, delta: number): string; export function formatDate(date: string): string; export function isWithinDays(date: string, days: number): boolean; export function isValidDateKey(date: string): boolean
-- fortuneEngine.ts: export function hash32(date: string): number; export interface ComputeScoreInput; export interface ComputeScoreResult; export function computeScore(input: ComputeScoreInput): ComputeScoreResult; export function resolveDominantGroup(dayLog: DayLog): DominantGroup; export function resolveTypeId(group: DominantGroup, score: number): FortuneTypeId; export interface ComputeEstimatedSavingInput; export function computeEstimatedSaving(input: ComputeEstimatedSavingInput): number
+- fortuneEngine.ts: export type ScoreBand = 'high' | 'mid' | 'low'; export function hash32(date: string): number; export function scoreBandOf(score: number): ScoreBand; export interface ComputeScoreInput; export interface ComputeScoreResult; export function computeScore(input: ComputeScoreInput): ComputeScoreResult; export function resolveDominantGroup(dayLog: DayLog): DominantGroup; export function resolveTypeId(group: DominantGroup, score: number): FortuneTypeId
 - fortuneTable.ts: export const TYPE_TABLE: Record<FortuneTypeId, FortuneType> =; export const TYPE_MATRIX: Record< "EAT" | "SHOP" | "LIFE" | "MISC", Record<"high" | "mid" | "low", FortuneTypeId> > =; export const COPY_TABLE: Record<FortuneTypeId, Record<"high" | "mid" | "low", CopyEntry>> =; export const getCharacterImage: getCharacterImageFn = (fortuType, date) =>; export const getFortuneMessage: getFortuneMessageFn = (fortuType, categoryId) =>
 - stats.ts: export interface StatsResult; export function getStats(endDate: string, days: number): StatsResult
 - storage.ts: export function getItem<T>(key: string): T | null; export function setItem<T>(key: string, value: T): void; export function removeItem(key: string): void; export function getDayLog(date: string): DayLog; export function saveDayLog(log: DayLog): Result<DayLog>; export function listDayLogs(from: string, to: string): DayLog[]; export function getMeta(): AppMeta; export function patchMeta(patch: Partial<AppMeta>): Result<AppMeta>
@@ -280,6 +284,7 @@ export const RouteState = {} as const;
 - utils.ts: export function cn(...classes: (string | boolean | undefined | null)[]): string; export function formatNumber(n: number): string; export function formatCurrency(n: number, currency = 'KRW'): string
 
 ### Components (src/components/)
+- AdSection.tsx: AdSection
 - AdSlot.tsx: AdSlot
 - Amount.tsx: Amount
 - BottomCTA.tsx: SubmitFooter, ButtonStack
@@ -296,13 +301,12 @@ export const RouteState = {} as const;
 - TossRewardAd.tsx: TossRewardAd
 
 ### Module Dependencies (import graph)
+  lib/computeFortune.ts → imports: lib/types, lib/storage, lib/date, lib/fortuneEngine, lib/fortuneTable, lib/alerts, lib/stats
   lib/fortuneEngine.ts → imports: lib/types, lib/fortuneTable
   lib/fortuneTable.ts → imports: lib/types, lib/contract
   lib/stats.ts → imports: lib/storage, lib/types
   lib/storage.ts → imports: lib/types, lib/types, lib/types
-  pages/History.tsx → imports: components/ScreenScaffold, components/SummaryHero, components/Sparkline, components/StateView, hooks/useTypedNavigate, lib/date, lib/storage
-  pages/Input.tsx → imports: components/ScreenScaffold, components/Card, components/BottomCTA, hooks/useTypedNavigate, lib/date, lib/storage
-  pages/Result.tsx → imports: components/ScreenScaffold, components/Card, components/SummaryHero, components/StateView, hooks/u...
+  pages/History.tsx → imports: components/ScreenScaffold, components/SummaryHero, component...
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
 ## Already Implemented (do NOT duplicate or overwrite)
@@ -313,15 +317,16 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - 0005: 보존 정책(90일/30일) + Quota 대응 + Fortune 저장소 (files: src/lib/storage.ts, src/lib/__tests__/storage.prune.test.ts)
 - 0007: 운세 점수·유형 산출 순수 함수 (files: src/lib/fortuneEngine.ts, src/lib/__tests__/fortuneEngine.test.ts)
 - 0008: 지름신 주의보 규칙 엔진 detectAlerts (files: src/lib/alerts.ts, src/lib/__tests__/alerts.test.ts)
-- 0010: 앱 상태 훅 useAppData + 스트릭 계산 (files: src/hooks/useAppData.ts, src/hooks/__tests__/useAppData.test.tsx)
-- 0017: [부가] /settings 설정 · 데이터 초기화 · 고지 (files: src/pages/Settings.tsx, src/pages/__tests__/Settings.test.tsx)
-- 0018: App 라우팅 배선 + FloatingTabBar 전역 배치 (files: src/App.tsx)
 - 0009: computeFortune 오케스트레이션(캐시·근거 가드·저장) (files: src/lib/computeFortune.ts, src/lib/__tests__/computeFortune.test.ts)
+- 0010: 앱 상태 훅 useAppData + 스트릭 계산 (files: src/hooks/useAppData.ts, src/hooks/__tests__/useAppData.test.tsx)
 - 0011: / 홈(오늘) 화면 — 스트릭·요약·상태 카드 (files: src/pages/Home.tsx, src/pages/__tests__/Home.test.tsx)
 - 0012: /input 폼 — 카테고리 칩 + 금액/메모 입력 (files: src/pages/Result.tsx, src/components/PersonaHeroCard.tsx, src/components/AxisMiniBars.tsx, src/components/TipsCard.tsx)
 - 0014: /result 운세 결과 — 리워드 광고 게이트 (files: src/pages/Result.tsx, src/pages/__tests__/Result.test.tsx)
 - 0015: [부가] /history 7일 소비운세 히스토리 (files: src/pages/History.tsx, src/pages/__tests__/History.test.tsx)
 - 0016: [부가] /share 결과 공유 카드 (files: src/pages/Share.tsx, src/pages/__tests__/Share.test.tsx)
+- 0017: [부가] /settings 설정 · 데이터 초기화 · 고지 (files: src/pages/Settings.tsx, src/pages/__tests__/Settings.test.tsx)
+- 0018: App 라우팅 배선 + FloatingTabBar 전역 배치 (files: src/App.tsx)
+- 0019: 배너 광고 배치 + 콘텐츠 고지 다이얼로그 + 검수 폴리시 (files: src/components/AdSection.tsx, src/hooks/useContentNotice.ts, src/pages/Home.tsx)
 
 ## Available exports from existing files
 // src/App.tsx
@@ -329,6 +334,9 @@ export default function App() {
 
 // src/__scratch__/ScratchApp.tsx
 export {};
+
+// src/components/AdSection.tsx
+export function AdSection() {
 
 // src/components/AdSlot.tsx
 export function AdSlot({ adGroupId, className, variant, theme }: AdSlotProps) {
@@ -381,6 +389,9 @@ export function computeStreak(logs: DayLog[], endDate: string): number {
 export interface UseAppDataResult {
 export function useAppData(): UseAppDataResult {
 
+// src/hooks/useContentNotice.ts
+export function useContentNotice(): ContentNotice {
+
 // src/hooks/useTypedNavigate.ts
 export type AppPath = keyof RouteState;
 export function useTypedNavigate() {
@@ -393,9 +404,7 @@ export function detectAlerts(input: DetectAlertsInput): AlertItem[] {
 export function computeFortune(date: string): Result<FortuneRecord> {
 export function unlockFortune(date: string): Result<FortuneRecord> {
 
-// src/lib/contract.ts
-export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings';
-export type Fortune = { id: string; date: string; cat
+// src/lib/contrac
 
 ## Memory Index (자동 학습 — 힌트로만 사용, 실제 코드 확인 필수)
 
