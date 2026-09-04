@@ -61,6 +61,7 @@ export default function Input() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const amountRef = useRef<HTMLInputElement>(null);
+  const categoryRef = useRef<HTMLDivElement>(null);
 
   const total = entries.reduce((sum, e) => sum + e.amount, 0);
 
@@ -201,6 +202,17 @@ export default function Input() {
             />
           }
           title="어제 쓴 돈을 하나씩 담아주세요"
+          action={
+            <Button
+              variant="weak"
+              display="block"
+              onClick={() =>
+                categoryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            >
+              카테고리 선택하고 담기
+            </Button>
+          }
           testId="entries-empty"
         />
       )}
@@ -209,18 +221,20 @@ export default function Input() {
 
       <Paragraph.Text typography="st11">카테고리</Paragraph.Text>
       <Spacing size={8} />
-      <Chip kind="select" wrap>
-        {CATEGORY_IDS.map((id) => (
-          <ChipItem
-            key={id}
-            data-testid={`category-chip-${id}`}
-            selected={category === id}
-            onClick={() => setCategory(id)}
-          >
-            {CATEGORY_LABEL[id]}
-          </ChipItem>
-        ))}
-      </Chip>
+      <div ref={categoryRef}>
+        <Chip kind="select" wrap>
+          {CATEGORY_IDS.map((id) => (
+            <ChipItem
+              key={id}
+              data-testid={`category-chip-${id}`}
+              selected={category === id}
+              onClick={() => setCategory(id)}
+            >
+              {CATEGORY_LABEL[id]}
+            </ChipItem>
+          ))}
+        </Chip>
+      </div>
 
       <Spacing size={16} />
 
