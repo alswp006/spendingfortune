@@ -239,7 +239,6 @@ export const RouteState = {} as const;
     TossPurchase.tsx
     TossRewardAd.tsx
   hooks/
-    __tests__/
     useAppData.ts
     useTypedNavigate.ts
   lib/
@@ -303,7 +302,7 @@ export const RouteState = {} as const;
   lib/storage.ts → imports: lib/types, lib/types, lib/types
   pages/History.tsx → imports: components/ScreenScaffold, components/SummaryHero, components/Sparkline, components/StateView, hooks/useTypedNavigate, lib/date, lib/storage
   pages/Input.tsx → imports: components/ScreenScaffold, components/Card, components/BottomCTA, hooks/useTypedNavigate, lib/date, lib/storage
-  pages/Result.tsx → imports: components/ScreenScaffold, components/Card, components/SummaryHero, components/Sta...
+  pages/Result.tsx → imports: components/ScreenScaffold, components/Card, components/SummaryHero, components/StateView, hooks/u...
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
 ## Already Implemented (do NOT duplicate or overwrite)
