@@ -259,7 +259,7 @@ export const RouteState = {} as const;
 - contract.ts: export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings'; export type Fortune =; export type FortuneType = 'rich' | 'ruin' | 'neutral'; export type Category =; export type Alert =; export class ValidationError extends Error; export type todayKSTFn = () => string; export type addDaysFn = (dateStr: string, days: number) => string
 - date.ts: export function todayKST(now?: Date): string; export function addDays(date: string, delta: number): string; export function formatDate(date: string): string; export function isWithinDays(date: string, days: number): boolean; export function isValidDateKey(date: string): boolean
 - fortuneTable.ts: export const TYPE_TABLE: Record<FortuneTypeId, FortuneType> =; export const TYPE_MATRIX: Record< "EAT" | "SHOP" | "LIFE" | "MISC", Record<"high" | "mid" | "low", FortuneTypeId> > =; export const COPY_TABLE: Record<FortuneTypeId, Record<"high" | "mid" | "low", CopyEntry>> =; export const getCharacterImage: getCharacterImageFn = (fortuType, date) =>; export const getFortuneMessage: getFortuneMessageFn = (fortuType, categoryId) =>
-- storage.ts: export function getItem<T>(key: string): T | null; export function setItem<T>(key: string, value: T): void; export function removeItem(key: string): void
+- storage.ts: export function getItem<T>(key: string): T | null; export function setItem<T>(key: string, value: T): void; export function removeItem(key: string): void; export function getDayLog(date: string): DayLog; export function saveDayLog(log: DayLog): Result<DayLog>; export function listDayLogs(from: string, to: string): DayLog[]; export function getMeta(): AppMeta; export function patchMeta(patch: Partial<AppMeta>): Result<AppMeta>
 - types.ts: export type CategoryId = | 'food' | 'cafe' | 'shopping' | 'transport' | 'culture' | 'health' | 'living' | 'etc'; export const CATEGORY_LABEL: Record<CategoryId, string> =; export interface SpendingEntry; export interface DayLog; export type FortuneTypeId = | 'gourmet_saver' | 'cafe_addict' | 'delivery_lord' | 'smart_shopper' | 'wishlister' | 'impu; export interface FortuneType; export type AlertLevel = 'caution' | 'danger'; export type AlertRule = 'CATEGORY_CONCENTRATION' | 'SPIKE'
 - utils.ts: export function cn(...classes: (string | boolean | undefined | null)[]): string; export function formatNumber(n: number): string; export function formatCurrency(n: number, currency = 'KRW'): string
 
@@ -281,12 +281,14 @@ export const RouteState = {} as const;
 
 ### Module Dependencies (import graph)
   lib/fortuneTable.ts → imports: lib/types, lib/contract
+  lib/storage.ts → imports: lib/types, lib/types, lib/types
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
 ## Already Implemented (do NOT duplicate or overwrite)
 - 0001: 도메인 타입 + RouteState 정의 (files: src/lib/types.ts)
 - 0002: 날짜 유틸(KST) todayKST/addDays/formatDate (files: src/lib/date.ts, src/lib/__tests__/date.test.ts)
 - 0003: 12유형 캐릭터 테이블 + 고정 문구 테이블 (files: src/lib/fortuneTable.ts, src/lib/__tests__/fortuneTable.test.ts, public/characters/)
+- 0004: 저장소 CRUD + 입력 검증 + 손상 복구 (files: src/lib/storage.ts, src/lib/__tests__/storage.test.ts)
 
 ## Available exports from existing files
 // src/App.tsx

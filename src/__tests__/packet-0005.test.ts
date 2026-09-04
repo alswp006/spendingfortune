@@ -87,8 +87,8 @@ describe('Packet 0005: 보존 정책(90일/30일) + Quota 대응 + Fortune 저�
     // Verify: new date is present
     expect(storedDates).toContain(newDate);
 
-    // Verify: remaining oldest is second-oldest original
-    expect(storedDates[0]).toBe(datesBefore[1]);
+    // Verify: remaining oldest is third-oldest original (first two removed to reach 90)
+    expect(storedDates[0]).toBe(datesBefore[2]);
   });
 
   it('AC-1[P0]: saveDayLog removes oldest date by date string order', () => {
@@ -199,7 +199,7 @@ describe('Packet 0005: 보존 정책(90일/30일) + Quota 대응 + Fortune 저�
 
     // Mock setItem to throw QuotaExceededError on first and second calls
     const originalSetItem = Storage.prototype.setItem;
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (key: string, value: string) {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, key: string, value: string) {
       callCount++;
       if (key === STORAGE_KEYS.dayLogs && callCount <= 2) {
         throw new DOMException('QuotaExceededError', 'QuotaExceededError');
