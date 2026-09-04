@@ -93,7 +93,7 @@ export default function History() {
   return (
     <ScreenScaffold top={<Top title={<Top.TitleParagraph>소비운세 히스토리</Top.TitleParagraph>} />}>
       <SummaryHero
-        testId="history-avg"
+        testId="history-avg-hero"
         label="최근 7일 하루 평균"
         value={<Amount value={stats.dailyAvg} unit="원" typography="t1" />}
         caption={`기록 ${stats.loggedDays}일`}
@@ -116,17 +116,21 @@ export default function History() {
           <Card>
             <Paragraph.Text typography="t5">카테고리 비중</Paragraph.Text>
             <Spacing size={12} />
-            {categoryEntries.map(([category, amount], i) => (
-              <div key={category}>
-                {i > 0 ? <Spacing size={12} /> : null}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Paragraph.Text typography="t6">{CATEGORY_LABEL[category]}</Paragraph.Text>
-                  <Amount value={amount} unit="원" typography="t6" />
+            <div data-testid="category-minibar">
+              {categoryEntries.map(([category, amount], i) => (
+                <div key={category}>
+                  {i > 0 ? <Spacing size={12} /> : null}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Paragraph.Text typography="t6">
+                      {CATEGORY_LABEL[category]} {Math.round((amount / stats.total) * 100)}%
+                    </Paragraph.Text>
+                    <Amount value={amount} unit="원" typography="t6" />
+                  </div>
+                  <Spacing size={4} />
+                  <MiniBar ratio={amount / stats.total} testId="history-category-bar" />
                 </div>
-                <Spacing size={4} />
-                <MiniBar ratio={amount / stats.total} testId="history-category-bar" />
-              </div>
-            ))}
+              ))}
+            </div>
           </Card>
         </>
       ) : null}

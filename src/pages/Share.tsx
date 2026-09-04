@@ -41,24 +41,40 @@ export default function Share() {
     );
   }
 
+  if (!record.unlocked) {
+    return (
+      <ScreenScaffold top={<Top title={<Top.TitleParagraph>공유 카드</Top.TitleParagraph>} />}>
+        <EmptyState
+          title="운세를 먼저 확인해주세요"
+          action={
+            <Button variant="weak" display="block" onClick={() => nav('/result', { date: record.date })}>
+              운세 확인하러 가기
+            </Button>
+          }
+          testId="share-locked"
+        />
+      </ScreenScaffold>
+    );
+  }
+
   const typeInfo = TYPE_TABLE[record.typeId];
 
   const handleCopy = () => {
-    const text = `${typeInfo.name} ${record.score}점 — ${record.headline}`;
+    const text = `오늘의 소비운세 ${record.score}점 · ${typeInfo.name}\n${record.headline}`;
     try {
       navigator.clipboard
         .writeText(text)
-        .then(() => setToast('문구를 복사했어요'))
-        .catch(() => setToast('복사하지 못했어요. 다시 시도해주세요'));
+        .then(() => setToast('복사했어요'))
+        .catch(() => setToast('복사를 지원하지 않는 환경이에요. 카드를 길게 눌러 저장해주세요'));
     } catch {
-      setToast('복사하지 못했어요. 다시 시도해주세요');
+      setToast('복사를 지원하지 않는 환경이에요. 카드를 길게 눌러 저장해주세요');
     }
   };
 
   return (
     <ScreenScaffold
       top={<Top title={<Top.TitleParagraph>공유 카드</Top.TitleParagraph>} />}
-      bottom={<SubmitFooter label="문구 복사하기" onClick={handleCopy} />}
+      bottom={<SubmitFooter label="문구 복사하기" onClick={handleCopy} testId="copy-button" />}
     >
       <Card testId="share-card">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

@@ -14,6 +14,8 @@ interface TossRewardAdProps {
   description?: string;
   /** 광고 버튼 텍스트 */
   buttonText?: string;
+  /** 광고 시청 유도 버튼의 data-testid(화면별 계약, 예: "unlock-button") */
+  buttonTestId?: string;
   /** 광고 시청 완료 콜백 */
   onRewarded?: () => void;
   /** 광고 로드 타임아웃 (ms). 초과 시 자동 언락 */
@@ -39,6 +41,7 @@ export function TossRewardAd({
   children,
   description = "광고를 시청하면 결과를 확인할 수 있어요",
   buttonText = "광고 보고 확인하기",
+  buttonTestId,
   onRewarded,
   timeoutMs = 15000,
 }: TossRewardAdProps) {
@@ -121,6 +124,7 @@ export function TossRewardAd({
     <div className="reward-ad-gate">
       <p className="reward-ad-description">{description}</p>
       <button
+        data-testid={buttonTestId}
         className={`reward-ad-button${isShowing ? " reward-ad-button--loading" : ""}`}
         onClick={handleWatch}
         disabled={isShowing || !adLoaded}

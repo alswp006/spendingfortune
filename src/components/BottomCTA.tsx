@@ -28,16 +28,19 @@ export function SubmitFooter({
   onClick,
   disabled,
   loading,
+  testId = "submit-footer",
 }: {
   label: ReactNode;
   onClick: () => void;
   disabled?: boolean;
   /** 제출 중 표시 — TDS ButtonProps.loading 패스스루. ui-design.md "제출 중 상태" 규칙의 실행 수단. */
   loading?: boolean;
+  /** 화면별 계약 testid가 "submit-footer"와 다를 때 오버라이드(예: "copy-button") */
+  testId?: string;
 }) {
   return (
     <FixedBottomCTA
-      data-testid="submit-footer"
+      data-testid={testId}
       onClick={() => {
         fireHaptic("success");
         onClick();

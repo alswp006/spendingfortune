@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Top, Paragraph, Spacing, Button, Toast, AlertDialog } from '@toss/tds-mobile';
-import { useNavigate } from 'react-router-dom';
 import { ScreenScaffold } from '@/components/ScreenScaffold';
 import { SummaryHero } from '@/components/SummaryHero';
 import { Amount } from '@/components/Amount';
@@ -8,6 +7,8 @@ import { EmptyState, LoadingState } from '@/components/StateView';
 import { AdSection } from '@/components/AdSection';
 import { useAppData } from '@/hooks/useAppData';
 import { useContentNotice } from '@/hooks/useContentNotice';
+import { useTypedNavigate } from '@/hooks/useTypedNavigate';
+import { todayKST } from '@/lib/date';
 import { STORAGE_KEYS } from '@/lib/types';
 
 /**
@@ -27,7 +28,7 @@ function isDayLogsCorrupted(): boolean {
 }
 
 export default function Home() {
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const { loading, streak, yesterdayLog } = useAppData();
   const [showCorruptToast, setShowCorruptToast] = useState(false);
   const { open: noticeOpen, description: noticeDescription, acknowledge: acknowledgeNotice } = useContentNotice();
@@ -40,6 +41,7 @@ export default function Home() {
   }, []);
 
   const isEmptyYesterday = !yesterdayLog.noSpend && yesterdayLog.entries.length === 0;
+  const hasYesterdayLog = yesterdayLog.updatedAt !== 0;
 
   return (
     <ScreenScaffold top={<Top title={<Top.TitleParagraph>오늘의 소비운세</Top.TitleParagraph>} />}>
@@ -63,9 +65,20 @@ export default function Home() {
             }
             caption={yesterdayLog.noSpend ? '어제는 무지출이었어요' : `${yesterdayLog.entries.length}건 기록`}
             action={
-              <Button variant="fill" display="block" data-testid="home-cta" onClick={() => navigate('/input')}>
-                어제 지출 기록하기
-              </Button>
+              hasYesterdayLog ? (
+                <Button
+                  variant="fill"
+                  display="block"
+                  data-testid="home-cta"
+                  onClick={() => navigate('/result', { date: todayKST() })}
+                >
+                  오늘의 운세 보기
+                </Button>
+              ) : (
+                <Button variant="fill" display="block" data-testid="home-cta" onClick={() => navigate('/input')}>
+                  어제 지출 기록하기
+                </Button>
+              )
             }
           />
 

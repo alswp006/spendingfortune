@@ -45,7 +45,7 @@ vi.mock("@/components/TossRewardAd", () => ({
 
 import Result from "@/pages/Result";
 
-const LOCK_MESSAGE = "광고를 보고 오늘의 운세를 열어보세요";
+const LOCK_MESSAGE = "광고를 보면 오늘의 소비운세가 열려요";
 
 function seedBasisDayLog(basisDate: string, total = 12000) {
   saveDayLog({

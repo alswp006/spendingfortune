@@ -18,7 +18,7 @@ import { CATEGORY_LABEL } from '@/lib/types';
 import type { RouteState } from '@/lib/types';
 
 const AD_SLOT_ID = import.meta.env.VITE_TOSS_AD_SLOT_ID || 'result-unlock';
-const LOCK_MESSAGE = '광고를 보고 오늘의 운세를 열어보세요';
+const LOCK_MESSAGE = '광고를 보면 오늘의 소비운세가 열려요';
 
 // SDK 호출은 WebView 밖(로컬 브라우저 등)에서 throw한다 — 조용히 무시하고 진행한다.
 function safeHaptic(type: 'tickWeak' | 'success') {
@@ -82,8 +82,14 @@ export default function Result() {
 
   const content = (
     <>
+      <div data-testid="content-notice-badge">
+        <Paragraph.Text typography="st13">재미로 보는 콘텐츠예요</Paragraph.Text>
+      </div>
+
+      <Spacing size={8} />
+
       <SummaryHero
-        testId="result-score"
+        testId="fortune-hero"
         label="오늘의 소비운"
         value={<Amount value={record.score} unit="점" typography="t1" />}
         caption={`어제 지출 ${formatNumber(record.yesterdayTotal)}원 기준`}
@@ -91,7 +97,7 @@ export default function Result() {
 
       <Spacing size={16} />
 
-      <Card>
+      <Card testId="character-card">
         <img src={typeInfo.imageSrc} width={160} height={160} alt={typeInfo.name} />
         <Spacing size={8} />
         <ListRow contents={<ListRow.Texts type="2RowTypeA" top={typeInfo.name} bottom={typeInfo.tagline} />} />
@@ -99,7 +105,7 @@ export default function Result() {
 
       <Spacing size={16} />
 
-      <Card>
+      <Card testId="advice-card">
         <Paragraph.Text typography="t4">{record.headline}</Paragraph.Text>
         <Spacing size={8} />
         <Paragraph.Text typography="t6">{record.advice}</Paragraph.Text>
@@ -162,11 +168,17 @@ export default function Result() {
         content
       ) : (
         <>
-          <Card>
+          <Card testId="fortune-lock-card">
             <Paragraph.Text typography="t6">{LOCK_MESSAGE}</Paragraph.Text>
           </Card>
           <Spacing size={16} />
-          <TossRewardAd slotId={AD_SLOT_ID} description={LOCK_MESSAGE} onRewarded={handleRewarded}>
+          <TossRewardAd
+            slotId={AD_SLOT_ID}
+            description={LOCK_MESSAGE}
+            buttonText="운세 확인하기"
+            buttonTestId="unlock-button"
+            onRewarded={handleRewarded}
+          >
             {content}
           </TossRewardAd>
         </>

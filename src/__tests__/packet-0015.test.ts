@@ -154,7 +154,7 @@ describe("[부가] /history 7일 소비운세 히스토리", () => {
 
     const expected = getStats(today, 7).dailyAvg;
     expect(expected).toBeGreaterThan(0);
-    expect(screen.getByTestId("history-avg").textContent).toContain(formatNumber(expected));
+    expect(screen.getByTestId("history-avg-hero").textContent).toContain(formatNumber(expected));
     expect(container.innerHTML).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);
   });
 });

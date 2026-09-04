@@ -108,7 +108,7 @@ describe('/history 소비운세 히스토리', () => {
     const { container } = renderWithRouter(<History />);
 
     const expected = getStats(today, 7).dailyAvg;
-    expect(screen.getByTestId('history-avg')).toHaveTextContent(formatNumber(expected));
+    expect(screen.getByTestId('history-avg-hero')).toHaveTextContent(formatNumber(expected));
     expect(container.innerHTML).not.toMatch(/#[0-9a-fA-F]{3,8}/);
   });
 });

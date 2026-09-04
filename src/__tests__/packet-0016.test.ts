@@ -110,7 +110,7 @@ describe("[부가] /share 결과 공유 카드", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "문구 복사하기" }));
 
-    expect(await screen.findByText("문구를 복사했어요")).toBeInTheDocument();
+    expect(await screen.findByText("복사했어요")).toBeInTheDocument();
     expect(writeTextMock).toHaveBeenCalledTimes(1);
 
     const copiedText = writeTextMock.mock.calls[0][0] as string;
@@ -130,7 +130,9 @@ describe("[부가] /share 결과 공유 카드", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "문구 복사하기" }));
 
-    expect(await screen.findByText("복사하지 못했어요. 다시 시도해주세요")).toBeInTheDocument();
+    expect(
+      await screen.findByText("복사를 지원하지 않는 환경이에요. 카드를 길게 눌러 저장해주세요"),
+    ).toBeInTheDocument();
     expect(writeTextMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledTimes(0);
   });
