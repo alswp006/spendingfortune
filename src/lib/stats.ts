@@ -1,95 +1,93 @@
+import { addDays, isValidDateKey, todayKST } from '@/lib/date';
 import { listDayLogs } from '@/lib/storage';
+import { CATEGORY_LABEL } from '@/lib/types';
 import type { CategoryId, DayLog } from '@/lib/types';
 
-export interface StatsResult {
+export interface Stats {
   total: number;
   loggedDays: number;
   byCategory: Record<CategoryId, number>;
   dailyAvg: number;
 }
 
-const ALL_CATEGORIES: CategoryId[] = ['food', 'cafe', 'shopping', 'transport', 'culture', 'health', 'living', 'etc'];
+/** 초기 패킷이 쓰던 이름 — 새 코드는 `Stats`를 쓴다 */
+export type StatsResult = Stats;
 
-export function getStats(endDate: string, days: number): StatsResult {
-  // Calculate start date: endDate - (days - 1)
-  const end = new Date(endDate);
-  const start = new Date(end);
-  start.setDate(start.getDate() - (days - 1));
-  const startDate = start.toISOString().split('T')[0];
+const CATEGORY_IDS = Object.keys(CATEGORY_LABEL) as CategoryId[];
 
-  // Fetch all logs in range
-  const logs = listDayLogs(startDate, endDate);
-
-  // Initialize accumulators
-  let total = 0;
-  let loggedDays = 0;
-  const byCategory: Record<CategoryId, number> = {} as Record<CategoryId, number>;
-
-  // Initialize all categories to 0
-  for (const cat of ALL_CATEGORIES) {
-    byCategory[cat] = 0;
+function emptyByCategory(): Record<CategoryId, number> {
+  const acc = {} as Record<CategoryId, number>;
+  for (const id of CATEGORY_IDS) {
+    acc[id] = 0;
   }
-
-  // Process each log
-  for (const log of logs) {
-    // Skip corrupted records
-    if (!isValidDayLog(log)) {
-      continue;
-    }
-
-    // Count this as a logged day (even if noSpend=true)
-    loggedDays += 1;
-
-    // Add total
-    const logTotal = typeof log.total === 'number' && !Number.isNaN(log.total) ? log.total : 0;
-    total += logTotal;
-
-    // Add by category
-    if (Array.isArray(log.entries)) {
-      for (const entry of log.entries) {
-        if (entry && typeof entry === 'object') {
-          const category = (entry as any).category as CategoryId;
-          const amount = (entry as any).amount;
-
-          if (category && typeof amount === 'number' && !Number.isNaN(amount) && ALL_CATEGORIES.includes(category)) {
-            byCategory[category] += amount;
-          }
-        }
-      }
-    }
-  }
-
-  // Calculate daily average
-  const dailyAvg = loggedDays > 0 ? Math.round(total / loggedDays) : 0;
-
-  return {
-    total,
-    loggedDays,
-    byCategory,
-    dailyAvg,
-  };
+  return acc;
 }
 
-function isValidDayLog(log: unknown): log is DayLog {
-  if (!log || typeof log !== 'object') {
-    return false;
-  }
+function isCategoryId(value: unknown): value is CategoryId {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(CATEGORY_LABEL, value);
+}
 
+/**
+ * @AI:NOTE 저장소(0004)가 이미 손상 레코드를 거르지만 한 겹 더 막는다 — localStorage는
+ * 다른 버전의 앱·수동 편집으로도 오염될 수 있고, 여기서 throw가 새면 홈·히스토리가
+ * 통째로 흰 화면이 된다. 어긋난 레코드는 조용히 건너뛴다(throw·console.error 금지).
+ */
+function isUsableDayLog(log: unknown): log is DayLog {
+  if (!log || typeof log !== 'object') return false;
   const record = log as Record<string, unknown>;
-
-  // Check essential fields
-  if (typeof record.date !== 'string') return false;
-  if (typeof record.noSpend !== 'boolean') return false;
-
-  // total must be a number (or at least coercible)
-  if (typeof record.total !== 'number' || Number.isNaN(record.total)) {
-    return false;
-  }
-
-  // entries must be an array (or empty)
-  if (!Array.isArray(record.entries) && record.entries !== undefined) {
-    return false;
-  }
-
+  if (typeof record.total !== 'number' || !Number.isFinite(record.total)) return false;
+  if (!Array.isArray(record.entries)) return false;
   return true;
+}
+
+/**
+ * endDate를 포함한 과거 days일 구간의 지출을 집계한다.
+ * loggedDays는 무지출(noSpend) 기록도 1일로 센다 — 기록한 날 자체가 스트릭의 단위다.
+ */
+export function getStats(endDate: string, days: number): Stats {
+  const byCategory = emptyByCategory();
+  const end = isValidDateKey(endDate) ? endDate : todayKST();
+  const span = Number.isInteger(days) && days > 0 ? days : 0;
+
+  if (span === 0) {
+    return { total: 0, loggedDays: 0, byCategory, dailyAvg: 0 };
+  }
+
+  // endDate 포함 과거 span일 (오래된 날짜 → endDate 순)
+  const dates: string[] = [];
+  for (let i = span - 1; i >= 0; i--) {
+    dates.push(addDays(end, -i));
+  }
+  const startDate = addDays(end, -(span - 1));
+
+  const logsByDate = new Map<string, DayLog>();
+  for (const log of listDayLogs(startDate, end)) {
+    if (log && typeof log.date === 'string') {
+      logsByDate.set(log.date, log);
+    }
+  }
+
+  let total = 0;
+  let loggedDays = 0;
+
+  for (const date of dates) {
+    const log = logsByDate.get(date);
+    if (log === undefined || !isUsableDayLog(log)) continue;
+
+    loggedDays += 1;
+    total += log.total;
+
+    for (const entry of log.entries) {
+      if (!entry || typeof entry !== 'object') continue;
+      const { category, amount } = entry as { category?: unknown; amount?: unknown };
+      if (!isCategoryId(category)) continue;
+      // Number.isInteger는 NaN·Infinity·소수를 모두 걸러낸다
+      if (typeof amount !== 'number' || !Number.isInteger(amount)) continue;
+      byCategory[category] += amount;
+    }
+  }
+
+  const dailyAvg = loggedDays > 0 ? Math.round(total / loggedDays) : 0;
+
+  return { total, loggedDays, byCategory, dailyAvg };
 }
