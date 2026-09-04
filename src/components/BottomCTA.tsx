@@ -37,6 +37,7 @@ export function SubmitFooter({
 }) {
   return (
     <FixedBottomCTA
+      data-testid="submit-footer"
       onClick={() => {
         fireHaptic("success");
         onClick();

@@ -194,11 +194,19 @@ export const tdsFactory = () => ({
       { Header: ({ children }: any) => React.createElement("div", null, children) },
     ),
 
-    Chip: ({ children, selected, onClick }: any) =>
+    // Chip = 그룹 컨테이너(div), ChipItem = 개별 선택 가능한 pill(button). 실물 TDS와 동일하게
+    // 두 컴포넌트로 분리해야 한다 — Chip 하나로 뭉치면 실 코드(Chip 안에 ChipItem)에서
+    // ChipItem이 이 파일에 없어 `undefined` 컴포넌트 렌더 크래시가 난다.
+    Chip: ({ children, kind, shape, size, variant, margin, wrap, withColorBackground, ...rest }: any) =>
+      React.createElement("div", { role: "group", ...rest }, children),
+
+    ChipItem: ({ children, selected, onClick, left, right, ...rest }: any) =>
       React.createElement(
         "button",
-        { role: "button", "aria-pressed": selected, onClick },
+        { type: "button", "aria-pressed": selected, onClick, ...rest },
+        left,
         children,
+        right,
       ),
 
     Switch: ({ checked, onChange }: any) =>
