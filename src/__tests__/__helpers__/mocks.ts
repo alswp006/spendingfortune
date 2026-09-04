@@ -15,14 +15,23 @@
 import React from "react";
 import { vi } from "vitest";
 
+/**
+ * TDS/SDK 목은 vitest.setup.ts가 **테스트 파일 import보다 먼저** 등록한다.
+ *
+ * 왜 전역인가: `vi.mock`은 호출된 파일의 최상단으로만 호이스팅된다. 헬퍼 함수 안에서
+ * 호출하면 등록이 테스트 파일 import '뒤'로 밀려, 이미 로드된 모듈은 실물을 잡고
+ * 그 뒤 그래프는 목을 잡는 **이중 인스턴스**가 생긴다(실측 2026-09-05: 테스트 파일의
+ * `generateHapticFeedback`은 실물 → "is not a spy", FloatingTabBar의 useLocation은
+ * 다른 Router 컨텍스트를 읽어 활성 탭이 항상 '/'). 그래서 등록은 setup에서 한 번만 하고,
+ * 아래 `mockXxx()`들은 기존 호출부 호환을 위해 남기되 이미 전역 등록됐으면 no-op이다.
+ */
 export const mockNavigate = vi.fn();
 export const mockLocation = { pathname: "/", search: "", state: null, key: "default" };
 
 // ── TDS (@toss/tds-mobile) ──
 // TDS components use CSS-in-JS + layout hooks that crash in jsdom.
 // Replace with lightweight DOM stand-ins that preserve prop-based testing.
-export function mockTds() {
-  vi.mock("@toss/tds-mobile", () => ({
+export const tdsFactory = () => ({
     Button: ({ children, onClick, ...props }: any) =>
       React.createElement("button", { onClick, ...props }, children),
 
@@ -158,12 +167,15 @@ export function mockTds() {
         ),
     ),
 
+    // title에는 보통 <Top.TitleParagraph>(=h1)가 들어온다 → 여기서 다시 h1으로 감싸면
+    // <h1><h1>이 되어 React가 validateDOMNesting 경고를 console.error로 찍는다
+    // ("콘솔 에러 0건" 단언을 목이 스스로 깨뜨림). 래퍼는 의미 없는 div로 둔다.
     Top: Object.assign(
       ({ children, title }: any) =>
         React.createElement(
           "nav",
           { role: "navigation" },
-          title && React.createElement("h1", null, title),
+          title && React.createElement("div", { "data-slot": "top-title" }, title),
           children,
         ),
       {
@@ -191,14 +203,15 @@ export function mockTds() {
 
     Switch: ({ checked, onChange }: any) =>
       React.createElement("input", { type: "checkbox", checked, onChange, role: "switch" }),
-  }));
-}
+});
+
+/** @deprecated 등록은 vitest.setup.ts가 한다 — 기존 호출부 호환용 no-op. */
+export function mockTds() {}
 
 // ── @apps-in-toss/web-framework ──
 // Mocks the REAL SDK exports (verified from .d.ts).
 // SDK is imperative (no hooks). Callback-style APIs invoke onEvent immediately for test speed.
-export function mockAppsInToss() {
-  vi.mock("@apps-in-toss/web-framework", () => {
+export const appsInTossFactory = () => {
     const Storage = {
       setItem: vi.fn(async (k: string, v: string) => { localStorage.setItem(k, v); }),
       getItem: vi.fn(async (k: string) => localStorage.getItem(k)),
@@ -313,38 +326,42 @@ export function mockAppsInToss() {
       getOperationalEnvironment: vi.fn(async () => "development"),
       getPermission: vi.fn(async () => ({ granted: true })),
       getSchemeUri: vi.fn(async () => "intoss://test-app"),
-    };
-  });
-}
+  };
+};
+
+/** @deprecated 등록은 vitest.setup.ts가 한다 — 기존 호출부 호환용 no-op. */
+export function mockAppsInToss() {}
 
 // ── Toss Reward Ad Component ──
 // TossRewardAd is a project-local component that wraps content behind ad viewing.
 // In tests, render the children directly (ad always "watched").
-export function mockTossRewardAd() {
-  vi.mock("@/components/TossRewardAd", () => ({
+export const tossRewardAdFactory = () => ({
     TossRewardAd: ({ children, onReward }: any) => {
       // Auto-trigger onReward in tests to unlock content
       if (onReward) setTimeout(onReward, 0);
       return children;
     },
-    default: ({ children }: any) => children,
-  }));
-}
+  default: ({ children }: any) => children,
+});
+
+/** @deprecated 등록은 vitest.setup.ts가 한다 — 기존 호출부 호환용 no-op. */
+export function mockTossRewardAd() {}
 
 // ── react-router-dom ──
 // Preserve actual router + override useNavigate for assertion.
-export function mockRouter() {
-  vi.mock("react-router-dom", async () => {
-    const actual = await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom",
-    );
-    return {
-      ...actual,
-      useNavigate: () => mockNavigate,
-      useLocation: () => mockLocation,
-    };
-  });
-}
+export const routerFactory = async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>(
+    "react-router-dom",
+  );
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useLocation: () => mockLocation,
+  };
+};
+
+/** @deprecated 등록은 vitest.setup.ts가 한다 — 기존 호출부 호환용 no-op. */
+export function mockRouter() {}
 
 // ── Convenience: mock everything ──
 export function mockAll() {

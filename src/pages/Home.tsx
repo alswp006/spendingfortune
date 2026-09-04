@@ -46,10 +46,9 @@ export default function Home() {
         value={<Paragraph.Text typography="t2">어제 지출을 입력하면 오늘의 소비운세와 절약 조언을 리워드 광고 시청 후 알려주는 매일 콘텐츠</Paragraph.Text>}
         caption="로그인 없이 바로 쓸 수 있어요"
         action={
-          // 라벨은 앱의 핵심 행동 동사로 교체하라 — "연봉 계산하기"/"기록 남기기" 등.
-          // generic "시작하기"/"확인"은 카피 규칙 위반. onClick도 실제 첫 화면 경로로.
-          <Button variant="fill" display="block" onClick={() => navigate('/')}>
-            첫 결과 보기
+          // 라우팅 배선(Task 4.1)에서 실제 진입 경로로 연결. 스트릭·CTA 분기는 Task 3.10이 붙인다.
+          <Button variant="fill" display="block" onClick={() => navigate('/input')}>
+            어제 지출 기록하기
           </Button>
         }
         testId="home-hero"
