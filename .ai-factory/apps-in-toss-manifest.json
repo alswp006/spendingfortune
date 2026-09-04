@@ -1,0 +1,22 @@
+{
+  "koreanName": "소비운세",
+  "englishName": "SpendingFortune",
+  "appName": "spending-fortune",
+  "ageRating": "전체",
+  "supportEmail": "support@aifactory.dev",
+  "category": {
+    "primary": "생활",
+    "secondary": "엔터테인먼트"
+  },
+  "subtitle": "어제 지출로 오늘의 운세 확인",
+  "description": "어제 지출한 금액과 카테고리를 간단히 입력하면, 오늘의 소비운세를 리워드 광고 시청 후 확인할 수 있습니다. 지름신 주의보로 과소비 카테고리를 감지하고, 12유형 소비운세 캐릭터로부터 맞춤 절약 조언을 받습니다. 매일 갱신되는 운세 콘텐츠로 소비 습관을 재미있게 관리하고, 7일 히스토리 그래프로 소비 트렌드를 한눈에 파악할 수 있습니다.",
+  "searchKeywords": [
+    "소비운세",
+    "가계부",
+    "절약조언",
+    "소비습관",
+    "일일콘텐츠",
+    "재테크",
+    "소비운세캐릭터"
+  ]
+}
