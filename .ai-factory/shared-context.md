@@ -242,6 +242,7 @@ export const RouteState = {} as const;
     contract.ts
     date.ts
     fortuneTable.ts
+    stats.ts
     storage.ts
     types.ts
     utils.ts
@@ -259,6 +260,7 @@ export const RouteState = {} as const;
 - contract.ts: export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings'; export type Fortune =; export type FortuneType = 'rich' | 'ruin' | 'neutral'; export type Category =; export type Alert =; export class ValidationError extends Error; export type todayKSTFn = () => string; export type addDaysFn = (dateStr: string, days: number) => string
 - date.ts: export function todayKST(now?: Date): string; export function addDays(date: string, delta: number): string; export function formatDate(date: string): string; export function isWithinDays(date: string, days: number): boolean; export function isValidDateKey(date: string): boolean
 - fortuneTable.ts: export const TYPE_TABLE: Record<FortuneTypeId, FortuneType> =; export const TYPE_MATRIX: Record< "EAT" | "SHOP" | "LIFE" | "MISC", Record<"high" | "mid" | "low", FortuneTypeId> > =; export const COPY_TABLE: Record<FortuneTypeId, Record<"high" | "mid" | "low", CopyEntry>> =; export const getCharacterImage: getCharacterImageFn = (fortuType, date) =>; export const getFortuneMessage: getFortuneMessageFn = (fortuType, categoryId) =>
+- stats.ts: export interface StatsResult; export function getStats(endDate: string, days: number): StatsResult
 - storage.ts: export function getItem<T>(key: string): T | null; export function setItem<T>(key: string, value: T): void; export function removeItem(key: string): void; export function getDayLog(date: string): DayLog; export function saveDayLog(log: DayLog): Result<DayLog>; export function listDayLogs(from: string, to: string): DayLog[]; export function getMeta(): AppMeta; export function patchMeta(patch: Partial<AppMeta>): Result<AppMeta>
 - types.ts: export type CategoryId = | 'food' | 'cafe' | 'shopping' | 'transport' | 'culture' | 'health' | 'living' | 'etc'; export const CATEGORY_LABEL: Record<CategoryId, string> =; export interface SpendingEntry; export interface DayLog; export type FortuneTypeId = | 'gourmet_saver' | 'cafe_addict' | 'delivery_lord' | 'smart_shopper' | 'wishlister' | 'impu; export interface FortuneType; export type AlertLevel = 'caution' | 'danger'; export type AlertRule = 'CATEGORY_CONCENTRATION' | 'SPIKE'
 - utils.ts: export function cn(...classes: (string | boolean | undefined | null)[]): string; export function formatNumber(n: number): string; export function formatCurrency(n: number, currency = 'KRW'): string
@@ -281,6 +283,7 @@ export const RouteState = {} as const;
 
 ### Module Dependencies (import graph)
   lib/fortuneTable.ts → imports: lib/types, lib/contract
+  lib/stats.ts → imports: lib/storage, lib/types
   lib/storage.ts → imports: lib/types, lib/types, lib/types
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
