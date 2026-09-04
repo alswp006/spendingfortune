@@ -29,7 +29,12 @@ export type Category = { id: string; name: string; icon: string };
 export type Alert = { id: string; type: string; level: 'info' | 'warn' | 'error'; message: string; timestamp: string };
 
 /** 입력 검증 오류 클래스 (구현: 패킷 0001) */
-export type ValidationError = class ValidationError extends Error { constructor(field: string, reason: string) };
+export class ValidationError extends Error {
+  constructor(field: string, reason: string) {
+    super(`${field}: ${reason}`);
+    this.name = 'ValidationError';
+  }
+}
 
 /** 오늘 날짜 ISO string (KST) (구현: 패킷 0002) */
 export type todayKSTFn = () => string;
@@ -77,8 +82,139 @@ export type useContentNoticeFn = () => { isOpen: boolean; content: string; ackno
 
 ## Shared Types Contract (IMPORT these, do NOT redefine)
 ```typescript
-// Domain types — add your app-specific types here
-export {};
+// Domain types — SpendingFortune (SPEC Data Models)
+
+// ---- CategoryId ----
+export type CategoryId =
+  | 'food'
+  | 'cafe'
+  | 'shopping'
+  | 'transport'
+  | 'culture'
+  | 'health'
+  | 'living'
+  | 'etc';
+
+export const CATEGORY_LABEL: Record<CategoryId, string> = {
+  food: '식비',
+  cafe: '카페/간식',
+  shopping: '쇼핑',
+  transport: '교통',
+  culture: '문화/여가',
+  health: '건강/의료',
+  living: '생활/구독',
+  etc: '기타',
+};
+
+// ---- SpendingEntry / DayLog ----
+export interface SpendingEntry {
+  id: string;
+  category: CategoryId;
+  amount: number;
+  memo: string;
+  createdAt: number;
+}
+
+export interface DayLog {
+  date: string;
+  entries: SpendingEntry[];
+  noSpend: boolean;
+  total: number;
+  updatedAt: number;
+}
+
+// ---- FortuneTypeId (12종) ----
+export type FortuneTypeId =
+  | 'gourmet_saver'
+  | 'cafe_addict'
+  | 'delivery_lord'
+  | 'smart_shopper'
+  | 'wishlister'
+  | 'impulse_god'
+  | 'planner_cpa'
+  | 'balance_master'
+  | 'subscription_hell'
+  | 'zero_spender'
+  | 'dust_collector'
+  | 'flexer';
+
+export interface FortuneType {
+  id: FortuneTypeId;
+  name: string;
+  tagline: string;
+  imageSrc: string;
+}
+
+// ---- Alerts ----
+export type AlertLevel = 'caution' | 'danger';
+export type AlertRule = 'CATEGORY_CONCENTRATION' | 'SPIKE';
+
+export interface AlertItem {
+  rule: AlertRule;
+  level: AlertLevel;
+  category: CategoryId | null;
+  message: string;
+  ratio: number;
+}
+
+// ---- FortuneRecord ----
+export interface FortuneRecord {
+  date: string;
+  basisDate: string;
+  score: number;
+  typeId: FortuneTypeId;
+  headline: string;
+  advice: string;
+  savingTip: string;
+  luckyCategory: CategoryId;
+  cautionCategory: CategoryId | null;
+  estimatedSaving: number;
+  alerts: AlertItem[];
+  yesterdayTotal: number;
+  unlocked: boolean;
+  createdAt: number;
+}
+
+// ---- AppMeta ----
+export interface AppMeta {
+  version: 1;
+  noticeAckedAt: number | null;
+  lastOpenDate: string | null;
+  streakCount: number;
+  schemaMigratedAt: number | null;
+}
+
+export const DEFAULT_META: AppMeta = {
+  version: 1,
+  noticeAckedAt: null,
+  lastOpenDate: null,
+  streakCount: 0,
+  schemaMigratedAt: null,
+};
+
+// ---- localStorage keys ----
+export const STORAGE_KEYS = {
+  dayLogs: 'sf.daylogs.v1',
+  fortunes: 'sf.fortunes.v1',
+  meta: 'sf.meta.v1',
+} as const;
+
+// ---- Result ----
+export type Result<T> = { ok: true; value: T } | { ok: false; reason: string };
+
+// ---- RouteState (per-path navigate state shape) ----
+export interface RouteState {
+  '/': undefined;
+  '/input': undefined;
+  '/result': { date: string } | null;
+  '/history': undefined;
+  '/share': { date: string } | null;
+  '/settings': undefined;
+}
+
+// Runtime marker so consumers can `import { RouteState }` for typeof-checks
+// even though the shape above is purely a type (interfaces have no runtime form).
+export const RouteState = {} as const;
 
 ```
 
@@ -102,6 +238,7 @@ export {};
     TossRewardAd.tsx
   hooks/
   lib/
+    contract.ts
     storage.ts
     types.ts
     utils.ts
@@ -116,7 +253,9 @@ export {};
   vite-env.d.ts
 
 ### Exports (src/lib/)
+- contract.ts: export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings'; export type Fortune =; export type FortuneType = 'rich' | 'ruin' | 'neutral'; export type Category =; export type Alert =; export class ValidationError extends Error; export type todayKSTFn = () => string; export type addDaysFn = (dateStr: string, days: number) => string
 - storage.ts: export function getItem<T>(key: string): T | null; export function setItem<T>(key: string, value: T): void; export function removeItem(key: string): void
+- types.ts: export type CategoryId = | 'food' | 'cafe' | 'shopping' | 'transport' | 'culture' | 'health' | 'living' | 'etc'; export const CATEGORY_LABEL: Record<CategoryId, string> =; export interface SpendingEntry; export interface DayLog; export type FortuneTypeId = | 'gourmet_saver' | 'cafe_addict' | 'delivery_lord' | 'smart_shopper' | 'wishlister' | 'impu; export interface FortuneType; export type AlertLevel = 'caution' | 'danger'; export type AlertRule = 'CATEGORY_CONCENTRATION' | 'SPIKE'
 - utils.ts: export function cn(...classes: (string | boolean | undefined | null)[]): string; export function formatNumber(n: number): string; export function formatCurrency(n: number, currency = 'KRW'): string
 
 ### Components (src/components/)
@@ -136,75 +275,5 @@ export {};
 - TossRewardAd.tsx: TossRewardAd
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
-## Available exports from existing files
-// src/App.tsx
-export default function App() {
-
-// src/components/AdSlot.tsx
-export function AdSlot({ adGroupId, className, variant, theme }: AdSlotProps) {
-
-// src/components/Amount.tsx
-export function Amount({
-
-// src/components/BottomCTA.tsx
-export function SubmitFooter({
-export function ButtonStack({
-
-// src/components/Card.tsx
-export function Card({
-
-// src/components/CountUp.tsx
-export function CountUp({
-
-// src/components/FloatingTabBar.tsx
-export type TabItem = {
-export function FloatingTabBar({ items }: { items: TabItem[] }) {
-
-// src/components/MiniBar.tsx
-export function MiniBar({
-
-// src/components/PageShell.tsx
-export function PageShell({ children, style }: { children: ReactNode; style?: CSSProperties }) {
-
-// src/components/ScreenScaffold.tsx
-export function ScreenScaffold({
-
-// src/components/Sparkline.tsx
-export function Sparkline({
-
-// src/components/StateView.tsx
-export function EmptyState({
-export function LoadingState({
-
-// src/components/SummaryHero.tsx
-export function SummaryHero({
-
-// src/components/TossPurchase.tsx
-export interface TossPurchaseResult {
-export function TossPurchase({
-
-// src/components/TossRewardAd.tsx
-export function TossRewardAd({
-
-// src/lib/contract.ts
-export type RouteState = '/' | '/input' | '/result' | '/history' | '/share' | '/settings';
-export type Fortune = { id: string; date: string; categoryId: string; amountKrw: number; score: number; fortuType: string; memo?: string; createdAt: string };
-export type FortuneType = 'rich' | 'ruin' | 'neutral';
-export type Category = { id: string; name: string; icon: string };
-export type Alert = { id: string; type: string; level: 'info' | 'warn' | 'error'; message: string; timestamp: string };
-export type ValidationError = class ValidationError extends Error { constructor(field: string, reason: string) };
-export type todayKSTFn = () => string;
-export type addDaysFn = (dateStr: string, days: number) => string;
-export type isWithinDaysFn = (dateStr: string, days: number) => boolean;
-
-
-## Memory Index (자동 학습 — 힌트로만 사용, 실제 코드 확인 필수)
-
-Available topics: deploy(2), general(11), testing(1), ui(1)
-
-Key lessons (verify against actual code before applying):
-- [general] 전역 라우팅·탭바·Provider 배선은 개별 화면보다 먼저(초반 20% 안에) 완료하고 미구현 화면은 스텁 라우트로 연결해, 시간 예산이 소진돼도 앱이 항상 실행 가능한 상태를 유지하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 저장·데이터 접근 등 기반 계층 패킷은 이를 import 하는 화면 패킷보다 반드시 먼저 완료·병합하고, 미완료면 상위 화면 패킷 병합을 차단하라 — 빈 기반 모듈 하나가 전 라우트 스모크를 무너뜨린다. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 외부에서 들어온 모든 값(라우터 state, 로컬 저장소, 부분 입력 폼)은 사용 직전에 배열·객체 기본값으로 정규화하고, 테이블/맵 조회 결과는 존재 확인 후에만 하위 속성이나 length에 접근하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 의존 그래프 최하층의 타입·계약 파일은 런타임 코드 0줄의 순수 선언으로 가장 먼저 단독 타입체크를 통과시키고, 파일 생성은 셸 명령이 아닌 허용된 편집 도구로만 하게 강제하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 영속 저장소에서 읽은 값은 항상 스키마 기본값으로 정규화해 배열·객체 타입을 보장한 뒤 반환하고, 화면은 빈/손상/부분 데이터에서도 렌더되도록 방어하라. (60% · 타 앱 1회 — 맹신 금지)
+## Already Implemented (do NOT duplicate or overwrite)
+- 0001: 도메인 타입 + RouteState 정의 (files: src/lib/types.ts)
