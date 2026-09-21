@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { computeStreak, useAppData } from "@/hooks/useAppData";
 import { getMeta, patchMeta } from "@/lib/storage";
@@ -16,6 +16,10 @@ function log(date: string, overrides: Partial<DayLog> = {}): DayLog {
 }
 
 describe("useAppData — 앱 상태 훅 + 스트릭 계산", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   // AC-1[P0]: 연속 3일 기록 → streak 3, 훅 마운트 후 meta.streakCount에 반영
   it("AC-1[P0]: 2026-09-02/03/04 연속 기록 시 computeStreak === 3", () => {
     const logs = [log("2026-09-02"), log("2026-09-03"), log("2026-09-04")];
@@ -23,6 +27,9 @@ describe("useAppData — 앱 상태 훅 + 스트릭 계산", () => {
   });
 
   it("AC-1[P0]: 훅 마운트 후 sf.meta.v1.streakCount === 3", async () => {
+    // 훅은 "어제"까지의 연속 기록을 센다 → 오늘을 2026-09-05(KST)로 고정
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-05T03:00:00+09:00"));
     localStorage.setItem(
       STORAGE_KEYS.dayLogs,
       JSON.stringify({
