@@ -38,7 +38,11 @@ function trySetWithQuotaRetry<T>(key: string, value: T): Result<undefined> {
 }
 
 export function removeItem(key: string): void {
-  localStorage.removeItem(key);
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // storage unavailable — nothing to remove
+  }
 }
 
 function emptyDayLog(date: string): DayLog {
@@ -204,7 +208,11 @@ export function getMeta(): AppMeta {
 export function patchMeta(patch: Partial<AppMeta>): Result<AppMeta> {
   const current = getMeta();
   const next: AppMeta = { ...current, ...patch, version: 1 };
-  localStorage.setItem(STORAGE_KEYS.meta, JSON.stringify(next));
+  try {
+    localStorage.setItem(STORAGE_KEYS.meta, JSON.stringify(next));
+  } catch {
+    return { ok: false, reason: 'STORAGE_UNAVAILABLE' };
+  }
   return { ok: true, value: next };
 }
 

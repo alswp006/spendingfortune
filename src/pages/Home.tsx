@@ -17,9 +17,9 @@ import { STORAGE_KEYS } from '@/lib/types';
  * 위해 Home이 직접 원본 문자열을 한 번 더 확인한다.
  */
 function isDayLogsCorrupted(): boolean {
-  const raw = localStorage.getItem(STORAGE_KEYS.dayLogs);
-  if (!raw) return false;
   try {
+    const raw = localStorage.getItem(STORAGE_KEYS.dayLogs);
+    if (!raw) return false;
     JSON.parse(raw);
     return false;
   } catch {
@@ -35,7 +35,11 @@ export default function Home() {
 
   useEffect(() => {
     if (isDayLogsCorrupted()) {
-      localStorage.setItem(STORAGE_KEYS.dayLogs, '{}');
+      try {
+        localStorage.setItem(STORAGE_KEYS.dayLogs, '{}');
+      } catch {
+        // storage unavailable — still tell the user
+      }
       setShowCorruptToast(true);
     }
   }, []);
