@@ -14,7 +14,9 @@ export function EmptyState({
   description,
   action,
   testId,
+  minHeight = "55dvh",
 }: {
+  minHeight?: string;
   /** Asset.ContentIcon 등(선택) */
   icon?: ReactNode;
   title: ReactNode;
@@ -32,7 +34,7 @@ export function EmptyState({
         alignItems: "center",
         textAlign: "center",
         padding: "48px 24px",
-        minHeight: "55dvh",
+        minHeight,
         justifyContent: "center",
         wordBreak: "keep-all",
       }}

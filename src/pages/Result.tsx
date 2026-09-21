@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Top, Paragraph, Spacing, Button, Chip, ChipItem, ListRow } from '@toss/tds-mobile';
+import { Top, Paragraph, Spacing, Button, Chip, ChipItem, ListRow, Asset } from '@toss/tds-mobile';
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 import { ScreenScaffold } from '@/components/ScreenScaffold';
 import { Card } from '@/components/Card';
@@ -48,6 +48,13 @@ export default function Result() {
     return (
       <ScreenScaffold top={<Top title={<Top.TitleParagraph>오늘의 소비운세</Top.TitleParagraph>} />}>
         <EmptyState
+          icon={
+            <Asset.Image
+              frameShape={{ width: 72, height: 72, radius: 20 }}
+              src="/characters/zero_spender.png"
+              alt=""
+            />
+          }
           title={
             result.reason === 'NO_BASIS_LOG'
               ? '어제 기록이 없어서 운세를 만들 수 없어요'

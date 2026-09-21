@@ -11,7 +11,8 @@ export function PageShell({ children, style }: { children: ReactNode; style?: CS
   return (
     <div
       style={{
-        minHeight: "100dvh",
+        boxSizing: "border-box",
+        minHeight: "calc(100dvh - var(--page-reserve, 0px))",
         paddingTop: "calc(var(--toss-safe-area-top) + 16px)",
         paddingBottom: "calc(var(--toss-safe-area-bottom) + 16px)",
         backgroundColor: "var(--adaptiveBackground)",

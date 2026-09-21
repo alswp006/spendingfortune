@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Top, Paragraph, Spacing, Button, Badge, Toast } from '@toss/tds-mobile';
+import { Top, Paragraph, Spacing, Button, Badge, Toast, Asset } from '@toss/tds-mobile';
 import { useLocation } from 'react-router-dom';
 import { ScreenScaffold } from '@/components/ScreenScaffold';
 import { Card } from '@/components/Card';
@@ -28,6 +28,13 @@ export default function Share() {
     return (
       <ScreenScaffold top={<Top title={<Top.TitleParagraph>공유 카드</Top.TitleParagraph>} />}>
         <EmptyState
+          icon={
+            <Asset.Image
+              frameShape={{ width: 72, height: 72, radius: 20 }}
+              src="/characters/zero_spender.png"
+              alt=""
+            />
+          }
           title="공유할 운세가 없어요"
           description="오늘의 운세를 먼저 확인해 주세요"
           action={
@@ -45,6 +52,13 @@ export default function Share() {
     return (
       <ScreenScaffold top={<Top title={<Top.TitleParagraph>공유 카드</Top.TitleParagraph>} />}>
         <EmptyState
+          icon={
+            <Asset.Image
+              frameShape={{ width: 72, height: 72, radius: 20 }}
+              src="/characters/zero_spender.png"
+              alt=""
+            />
+          }
           title="운세를 먼저 확인해주세요"
           action={
             <Button variant="weak" display="block" onClick={() => nav('/result', { date: record.date })}>

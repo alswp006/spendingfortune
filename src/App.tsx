@@ -30,7 +30,9 @@ const TABS: TabItem[] = [
 function TabLayout() {
   return (
     <>
-      <Outlet />
+      <div style={{ ['--page-reserve' as string]: 'calc(56px + env(safe-area-inset-bottom))' }}>
+        <Outlet />
+      </div>
       <div style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }} aria-hidden="true" />
       <FloatingTabBar items={TABS} />
     </>

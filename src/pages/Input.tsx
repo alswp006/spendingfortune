@@ -213,6 +213,7 @@ export default function Input() {
               카테고리 선택하고 담기
             </Button>
           }
+          minHeight="auto"
           testId="entries-empty"
         />
       )}
