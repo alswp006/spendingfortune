@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Top, ListRow, ConfirmDialog, Toast, Spacing } from '@toss/tds-mobile';
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 import { ScreenScaffold } from '@/components/ScreenScaffold';
-import { Card } from '@/components/Card';
 import { useAppData } from '@/hooks/useAppData';
 import { getStats } from '@/lib/stats';
 
@@ -39,7 +38,7 @@ export default function Settings() {
   return (
     <ScreenScaffold top={<Top title={<Top.TitleParagraph>설정</Top.TitleParagraph>} />}>
       <Spacing size={16} />
-      <Card testId="settings-info-card">
+      <div data-testid="settings-info-card" style={{ margin: '0 -24px' }}>
         <ListRow
           style={{ minHeight: 44, minWidth: 44 }}
           contents={
@@ -70,18 +69,18 @@ export default function Settings() {
             />
           }
         />
-      </Card>
+      </div>
 
       <Spacing size={16} />
 
-      <Card testId="settings-danger-card">
+      <div data-testid="settings-danger-card" style={{ margin: '0 -24px' }}>
         <ListRow
           style={{ minHeight: 44, minWidth: 44 }}
-          contents={<ListRow.Texts type="1RowTypeA" top="데이터 전체 삭제" />}
+          contents={<ListRow.Texts type="1RowTypeA" top={<span style={{ color: 'var(--adaptiveRed500)' }}>데이터 전체 삭제</span>} />}
           onClick={() => setDialogOpen(true)}
           data-testid="reset-row"
         />
-      </Card>
+      </div>
 
       <Spacing size={16} />
 

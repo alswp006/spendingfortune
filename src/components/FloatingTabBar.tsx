@@ -71,7 +71,7 @@ export function FloatingTabBar({ items }: { items: TabItem[] }) {
               cursor: "pointer",
               // 활성=브랜드 컬러 틴트, 비활성=중간 회색. 솔리드 배경/알약 없음.
               color: active ? "var(--adaptiveBlue500)" : "var(--adaptiveGrey700)",
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: active ? 700 : 500,
             }}
           >

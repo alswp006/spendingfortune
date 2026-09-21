@@ -238,6 +238,8 @@ export default function Input() {
 
       <Spacing size={16} />
 
+      {/* TextField는 자체 좌우 24px 패딩이 있어 본문 패딩만큼 상쇄해 헤더와 정렬 */}
+      <div style={{ margin: '0 -24px' }}>
       <TextField
         ref={amountRef}
         variant="line"
@@ -265,6 +267,7 @@ export default function Input() {
         value={memo}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setMemo(e.target.value)}
       />
+      </div>
 
       <Spacing size={16} />
 
@@ -277,6 +280,8 @@ export default function Input() {
       <Button variant="weak" size="large" display="block" onClick={handleNoSpend}>
         어제 무지출이었어요
       </Button>
+
+      <Spacing size={96} />
 
       <Toast open={toastMessage !== null} text={toastMessage ?? ''} position="bottom" />
     </ScreenScaffold>
