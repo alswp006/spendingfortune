@@ -148,6 +148,12 @@ export default function History() {
               tabIndex={0}
               style={{ minHeight: 44 }}
               onClick={() => goToResult(log.date)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  goToResult(log.date);
+                }
+              }}
             >
               {index > 0 ? <Spacing size={4} /> : null}
               <ListRow
