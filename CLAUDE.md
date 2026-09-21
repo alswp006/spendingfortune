@@ -6,7 +6,7 @@
 3. **Verify imports** — check that all imports resolve to existing files
 4. **Check for duplicates** — ensure you didn't recreate something that already exists
 5. **main.tsx 수정 금지** — @AI:ANCHOR 파일. TDSMobileAITProvider/BrowserRouter가 이미 설정됨
-6. **App.tsx Route 확인** — navigate()로 이동하는 모든 경로에 Route가 있는지 확인
+6. **App.tsx Route 확인** — navigate()로 이동하는 모든 경로에 Route가 있는지 확인. App.tsx 첫 줄에 `@ai-factory:wiring-first`가 있으면 스캐폴드가 라우트를 이미 깔았다. 네 파일 첫 줄에 `@ai-factory:placeholder`가 있으면 그건 "준비 중" 자리 페이지다 — 통째로 교체하고 마커를 지워라(마커가 남으면 산출물로 인정되지 않는다). **그 자리 페이지는 App.tsx에 Route가 이미 있으니 App.tsx를 수정하지 마라.** 반대로 네 화면 파일이 자리 페이지가 **아니고**(스캐폴드가 안 깔았다) App.tsx에 import도 Route도 없으면, 그 파일에 한해 네가 직접 App.tsx에 import + `<Route path="…" />`를 추가하라 — 아무도 안 달면 도달할 수 없는 화면이 된다. 그 외 기존 라우트·구조는 건드리지 마라
 7. **RouteState 타입 확인** — navigate state가 types.ts의 RouteState와 일치하는지 확인
 8. **비주얼 골격 확인** — 모든 페이지가 ScreenScaffold/PageShell로 감싸졌는가, 1차 CTA가 SubmitFooter 또는 display="block"인가(좌측 글자폭 금지), 결과/비교는 Card로 묶였는가
 9. **SDK 가드 확인** — 마운트시 SDK 호출(광고 등)·이벤트 핸들러(haptic/clipboard)가 try/catch 가드됐는가(흰 화면 방지)
@@ -77,7 +77,7 @@ If any check fails, fix it BEFORE completing. Finishing with known errors is a f
 - 이 두 파일이 CLAUDE.md 또는 다른 문서와 충돌하면, 이 두 파일이 우선
 
 ## CRITICAL: @apps-in-toss/web-framework SDK API (최우선 참조)
-- `.ai-factory/apps-in-toss-essential.txt` — 실제 설치된 SDK의 .d.ts에서 검증된 API 목록
+- `.ai-factory/apps-in-toss-essential.txt` — SDK 공개 API 목록(**항목별 출처 표기 참고** — 대부분 설치본 .d.ts 검증, 일부는 개발자센터 문서 출처)
 - SDK는 **imperative 함수**만 제공 (useTossLogin/useTossAd/useTossPayment 같은 React 훅 없음)
 - React 래퍼(TossRewardAd, AdSlot)가 필요하면 `src/components/`에 직접 구현 (템플릿에 참고 구현 있음)
 
@@ -116,12 +116,12 @@ import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 - 로그인: 세션 자동. 필요 시 getIsTossLoginIntegratedService()
 - 광고: loadFullScreenAd/showFullScreenAd(리워드·전면), TossAds.attachBanner(배너)
 - 결제: createOneTimePurchaseOrder / createSubscriptionPurchaseOrder
-- 정확한 시그니처는 .ai-factory/apps-in-toss-essential.txt(실제 .d.ts)에서 확인
+- 정확한 시그니처는 .ai-factory/apps-in-toss-essential.txt(항목별 출처 표기 참고)에서 확인
 - React 래퍼가 필요하면 src/components/에 imperative API를 직접 감싸 구현
 
 ## Pre-built UI 컴포넌트 (이미 구현됨 — import해서 쓰고 재구현 금지)
 새 페이지는 raw div로 골격을 짜지 말고 아래를 조립하라(마찰 줄이려 미리 만들어둠):
-- src/components/PageShell.tsx — 페이지 SafeArea 래퍼(100dvh + safe-area + adaptive 배경)
+- src/components/PageShell.tsx — 페이지 SafeArea 래퍼(100dvh + safe-area + adaptive 배경). **화면 진입·체류(3초) 로그를 자동으로 남긴다** — 페이지에서 Analytics.screen/useScreenLog를 또 부르지 마라(중복 집계)
 - src/components/ScreenScaffold.tsx — 골든 골격: PageShell + 헤더(top) + 본문 + 하단 CTA(bottom) 슬롯
 - src/components/BottomCTA.tsx — SubmitFooter(단일 1차 CTA, FixedBottomCTA 기반, 클릭 시 success 햅틱 자동) / ButtonStack(1·2차 CTA)
 - src/components/Card.tsx — 카드 컨테이너(결과/비교/지표는 raw div 말고 Card로 묶어 위계 생성). testId prop으로 레이아웃 테스트.
@@ -133,6 +133,9 @@ import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 - src/components/MiniBar.tsx — 진행률 바(0..1, 상환률·비중). 카드/행에 정보 밀도 추가.
 - src/components/Sparkline.tsx — 추이 인라인 SVG(상환 곡선 등). D3/차트 라이브러리 금지·번들 제한 → 이걸로(의존성 0).
 - src/components/AdSlot.tsx, TossRewardAd.tsx — 광고(이미 SDK 가드됨)
+- src/lib/analytics.ts — logClick(name) / logImpression(name) (화면·체류 로그는 PageShell이 자동 — `Analytics`를 직접 부르지 마라. 래퍼는 절대 throw하지 않는다)
+- src/lib/review.ts — requestReviewOnce() (핵심 태스크 **완료 직후** 1회 — 마운트 시 호출 금지)
+- src/lib/share.ts — shareApp({ message, path? }) (결과 화면에 버튼 하나 — `share`/`getTossShareLink` 직접 import 금지)
 골든 조합(폼/결과 화면): ScreenScaffold(top=Top, bottom=SubmitFooter) 안에 본문 + Card/SummaryHero로 핵심정보 묶기.
 골든 조합(탭-루트 홈, 하단 FloatingTabBar 있음): ScreenScaffold(top=Top) + SummaryHero(요약 숫자 + 카드 내 진입 버튼) + 하단 FloatingTabBar. 탭-루트엔 SubmitFooter 금지(탭바와 겹침 — 진입 액션은 카드 안에).
 
@@ -181,19 +184,19 @@ import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 
 
 ## Learned Patterns (자동 학습된 규칙 — 위 규칙보다 우선순위 낮음)
-- ⚠️ 문구가 모호해 사용자가 무엇을 하는지 이해 못 함 반복 → 화면 패킷 프롬프트에 '레이블·버튼 문구는 결과를 말할 것("확인"이 아니라 "3만원 저축하기") — 플레이스홀더 문구 금지' 경고 추가 (신뢰도 95%, 82회 관찰)
-- ⚠️ 빠져나갈 길이 없는 화면(막다른 길) 반복 → 화면 패킷 프롬프트에 '모든 화면에 돌아가거나 진행할 경로를 둘 것 — 뒤로가기·홈·다음 중 최소 하나' 경고 추가 (신뢰도 95%, 269회 관찰)
-- ⚠️ 가상 사용자가 화면에서 다음 행동을 못 찾음 (길 잃음) 반복 → 화면 패킷 프롬프트에 '모든 화면에 다음 행동이 보이는 단일 주요 CTA를 둘 것 — 사용자가 무엇을 눌러야 할지 추측하게 하지 말 것' 경고 추가 (신뢰도 95%, 85회 관찰)
-- ⚠️ 레이아웃 깨짐·겹침·잘림 반복 → 화면 패킷 프롬프트에 '모바일 폭(360px)에서 겹침·가로 스크롤·잘린 텍스트가 없는지 확인할 것' 경고 추가 (신뢰도 95%, 153회 관찰)
+- ⚠️ 문구가 모호해 사용자가 무엇을 하는지 이해 못 함 반복 → 화면 패킷 프롬프트에 '레이블·버튼 문구는 결과를 말할 것("확인"이 아니라 "3만원 저축하기") — 플레이스홀더 문구 금지' 경고 추가 (신뢰도 95%, 92회 관찰)
+- ⚠️ 빠져나갈 길이 없는 화면(막다른 길) 반복 → 화면 패킷 프롬프트에 '모든 화면에 돌아가거나 진행할 경로를 둘 것 — 뒤로가기·홈·다음 중 최소 하나' 경고 추가 (신뢰도 95%, 300회 관찰)
+- ⚠️ 가상 사용자가 화면에서 다음 행동을 못 찾음 (길 잃음) 반복 → 화면 패킷 프롬프트에 '모든 화면에 다음 행동이 보이는 단일 주요 CTA를 둘 것 — 사용자가 무엇을 눌러야 할지 추측하게 하지 말 것' 경고 추가 (신뢰도 95%, 86회 관찰)
+- ⚠️ 레이아웃 깨짐·겹침·잘림 반복 → 화면 패킷 프롬프트에 '모바일 폭(360px)에서 겹침·가로 스크롤·잘린 텍스트가 없는지 확인할 것' 경고 추가 (신뢰도 95%, 178회 관찰)
 - ⚠️ 화면 이동 후 입력·선택이 사라짐 반복 → 패킷 프롬프트에 '사용자 입력은 화면 이동을 넘어 유지할 것 — 라우트 전환 시 초기화되는 지역 상태에 담지 말 것' 경고 추가 (신뢰도 93%, 51회 관찰)
 
 ## Memory Index (자동 학습 — 힌트로만 사용, 실제 코드 확인 필수)
 
-Available topics: deploy(2), general(11), testing(1), ui(1)
+Available topics: deploy(4), general(13), testing(2), ui(3)
 
 Key lessons (verify against actual code before applying):
+- [general] 파일 생성 전 디렉토리 구조 확인 — mkdir -p로 경로 보장 (60% · 타 앱 1회 — 맹신 금지)
+- [general] 화면·라우팅 등 소비자 모듈은 그것이 import하는 생산자 모듈이 병합된 뒤에만 병합하고, 순서를 지킬 수 없으면 소비자 병합과 동시에 최소 플레이스홀더를 만들어 매 병합 직후 타입체크와 빌드가 항상 통과하도록 유지하라. (60% · 타 앱 1회 — 맹신 금지)
 - [general] 전역 라우팅·탭바·Provider 배선은 개별 화면보다 먼저(초반 20% 안에) 완료하고 미구현 화면은 스텁 라우트로 연결해, 시간 예산이 소진돼도 앱이 항상 실행 가능한 상태를 유지하라. (60% · 타 앱 1회 — 맹신 금지)
 - [general] 저장·데이터 접근 등 기반 계층 패킷은 이를 import 하는 화면 패킷보다 반드시 먼저 완료·병합하고, 미완료면 상위 화면 패킷 병합을 차단하라 — 빈 기반 모듈 하나가 전 라우트 스모크를 무너뜨린다. (60% · 타 앱 1회 — 맹신 금지)
 - [general] 외부에서 들어온 모든 값(라우터 state, 로컬 저장소, 부분 입력 폼)은 사용 직전에 배열·객체 기본값으로 정규화하고, 테이블/맵 조회 결과는 존재 확인 후에만 하위 속성이나 length에 접근하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 의존 그래프 최하층의 타입·계약 파일은 런타임 코드 0줄의 순수 선언으로 가장 먼저 단독 타입체크를 통과시키고, 파일 생성은 셸 명령이 아닌 허용된 편집 도구로만 하게 강제하라. (60% · 타 앱 1회 — 맹신 금지)
-- [general] 영속 저장소에서 읽은 값은 항상 스키마 기본값으로 정규화해 배열·객체 타입을 보장한 뒤 반환하고, 화면은 빈/손상/부분 데이터에서도 렌더되도록 방어하라. (60% · 타 앱 1회 — 맹신 금지)
